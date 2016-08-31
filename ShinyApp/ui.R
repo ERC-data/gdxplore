@@ -13,7 +13,6 @@ shinyUI(fluidPage(
   #    ),
     mainPanel(
       tabsetPanel(
-        tabPanel("File Manager",rpivotTableOutput("pwrpivottable")),
         tabPanel("Power",rpivotTableOutput("pwrpivottable")),
         tabPanel("Industry",rpivotTableOutput("indpivottable")),
         tabPanel('Transport',rpivotTableOutput('trapivottable')),
