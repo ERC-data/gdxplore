@@ -1,7 +1,10 @@
 
 library(shiny)
 
-rdsfilepath = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
+#CKAN: 
+rdsfilepath = "http://energydata.uct.ac.za/dataset/1db4d94d-867e-4706-a26e-b4600fee594b/resource/395efb75-30ae-4df1-b080-b7b3aabdb4fa/download/processedtestprojname24aug2016.rds"
+#local:
+#rdsfilepath = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
 #Bryce's comment...
 
 N = length(gdxlist) 
@@ -11,7 +14,11 @@ tradf = data.frame()
 clpricesdf = data.frame()
 varactdf = data.frame()
 
-tmplist = readRDS(rdsfilepath)
+
+#tmplist = readRDS(rdsfilepath)
+
+#CKAN
+tmplist = readRDS(gzcon(url(rdsfilepath)))
 
 print('Appending pivottable dataframe from each case...')
 #now have a list of lists - one list for each gdx
