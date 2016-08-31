@@ -7,7 +7,7 @@ rdsfilepath = "http://energydata.uct.ac.za/dataset/1db4d94d-867e-4706-a26e-b4600
 #rdsfilepath = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
 #Bryce's comment...
 
-N = length(gdxlist) 
+#N = length(gdxlist) 
 tmplist = list()
 pwrdf = data.frame()
 tradf = data.frame()
@@ -33,5 +33,5 @@ for (i in 1:n){
   #comdf = rbind(comdf, as.data.frame(tmplist[[i]][4]))
 }
 
-runApp(paste(workdir,'/ShinyApp/',sep =''))
+runApp(paste(getwd(),'/ShinyApp/',sep =''))
 
