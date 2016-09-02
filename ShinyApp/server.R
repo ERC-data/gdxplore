@@ -41,7 +41,7 @@ shinyServer(function(input, output) {
   output$trapivottable <- renderRpivotTable({
     rpivotTable(
       tradf,
-      rows=c('Subsubsector','Commodity_Name'),
+      rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
