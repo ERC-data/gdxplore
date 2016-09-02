@@ -334,7 +334,7 @@ processGDX <- function(gdxPath,gdxname){
   #add mapping
   passengerkmAll = addPRCmap(passengerkmAll)
   passengerkmAll = droplevels(passengerkmAll)
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice','Commodity_Name'))]#drop redundant columns
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice'))]#drop redundant columns
   
   #FREIGHT
   freightModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='FreightModes')
@@ -357,7 +357,7 @@ processGDX <- function(gdxPath,gdxname){
   #add mapping
   tonkmAll = addPRCmap(tonkmAll)
   tonkmAll = droplevels(tonkmAll)
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Commodity_Name','Sector'))]#drop the timeslice column
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector'))]#drop the timeslice column
   
   #Combine relavant dataframes and lists
   print('Combining dataframes into relavent sections')
