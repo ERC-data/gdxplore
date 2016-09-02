@@ -7,6 +7,7 @@ mycollist = c('Year')
 deflt_aggr = 'Sum'
 deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
+myinclusion = '01REF' #NOTE This will have to be automatic
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -21,6 +22,7 @@ shinyServer(function(input, output) {
       rows=myrowlist,
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals=deflt_vals,
       rendererName = deflt_view
     )
@@ -31,6 +33,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -41,6 +44,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -52,6 +56,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -63,6 +68,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -74,6 +80,7 @@ shinyServer(function(input, output) {
       rows=c('Case','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals= 'VAR_ACT',
       rendererName = deflt_view
     )
@@ -85,6 +92,7 @@ shinyServer(function(input, output) {
       rows=c('Case'),
       col = mycollist,
       aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
       vals= 'avgCLpriceAll',
       rendererName = 'Line Chart'
     )
