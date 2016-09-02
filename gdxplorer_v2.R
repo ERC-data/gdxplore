@@ -12,6 +12,9 @@ rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scen
 tmplist = list()
 pwrdf = data.frame()
 tradf = data.frame()
+resdf = data.frame()
+inddf = data.frame()
+comdf  = data.frame()
 clpricesdf = data.frame()
 varactdf = data.frame()
 
@@ -31,7 +34,9 @@ for (i in 1:n){
   tradf = rbind(tradf,as.data.frame(tmplist[[i]][2]))
   clpricesdf = rbind(clpricesdf, as.data.frame(tmplist[[i]][3]))
   varactdf = rbind(varactdf, as.data.frame(tmplist[[i]][4]))
-  #comdf = rbind(comdf, as.data.frame(tmplist[[i]][4]))
+  inddf = rbind(inddf,as.data.frame(tmplist[[i]][5]))
+  resdf = rbind(resdf,as.data.frame(tmplist[[i]][6]))
+  comdf = rbind(comdf, as.data.frame(tmplist[[i]][7]))
 }
 
 runApp(paste(getwd(),'/ShinyApp/',sep =''))
