@@ -108,6 +108,11 @@ processGDX <- function(gdxPath,gdxname){
   F_IN = addCOMmap(F_IN)
   F_IN = droplevels(F_IN)
   
+  F_OUT = addPRCmap(F_OUT)
+  F_OUT = addCOMmap(F_OUT)
+  F_OUT = droplevels(F_OUT)
+  
+  
   CST_INVC = addPRCmap(CST_INVC)
   CST_FIXC = addPRCmap(CST_FIXC)
   CST_ACTC = addPRCmap(CST_ACTC)
@@ -139,22 +144,35 @@ processGDX <- function(gdxPath,gdxname){
       summarise(CoalTotal = sum(F_IN))
     
     #coalsharefinal 
-    coalShareFinal = coalFinal
-    coalShareFinal$CoalShare = coalShareFinal$CoalTotal/totalFinal$totalFinal
+    coalShareFinal = merge(coalFinal,totalFinal)
+    coalShareFinal$CoalShare = coalShareFinal$CoalTotal/coalShareFinal$final
+    coalShareFinal = coalShareFinal[,-c(3,4)]
     
     #gasfinal. Note that this excludes exports (the supply sector)
-    gasFinal = F_IN[F_IN$Commodity_Name == 'GAS'& !(F_IN$Sector %in% c('','Supply')),] %>%
+    gasFinal = F_IN[F_IN$Commodity_Name %in% c('GAS','Gas')&F_IN$Sector !='',] %>%
       group_by(Region,Year)%>%
       summarise(GasTotal = sum(F_IN))
     
-    gasShareFinal = gasFinal
-    gasShareFinal$GasShare = gasShareFinal$GasTotal/totalFinal$totalFinal
+    gasShareFinal = merge(gasFinal,totalFinal)
+    gasShareFinal$GasShare = gasShareFinal$GasTotal/gasShareFinal$final
+    gasShareFinal = gasShareFinal[,-c(3,4)]
+    
+    oilFinal = F_OUT[F_OUT$Commodity_Name == 'Crude Oil'&F_OUT$Sector == 'Supply',]%>% 
+      group_by(Region,Year)%>%
+      summarise(oilTotal = sum(F_OUT))
+    
+    oilShareFinal = merge(totalFinal,oilFinal) %>% mutate(oilshare = oilTotal/final)
+    oilShareFinal = oilShareFinal[,-c(3,4)]
+    
+    #Fossil totals
+    fossilTotals = merge(merge(coalFinal,gasFinal),oilFinal)
     
     #Fossil Share 
-    fossilShareFinal = gasShareFinal
-    fossilShareFinal$FossilShare = fossilShareFinal$GasShare + coalShareFinal$CoalShare
-    fossilShareFinal = fossilShareFinal[,-c(3,4)]
+    fossilShareFinal = merge(merge(gasShareFinal,coalShareFinal),oilShareFinal)
+    fossilShareFinal = fossilShareFinal%>% mutate(totalFossilShare = GasShare+CoalShare+oilshare)
+    #fossilShareFinal = fossilShareFinal[,-c(3,4)]
   
+    
   #Average coal prices. NEEDS SIM inputs  
   print('Calculating Average coal prices')
   sim_fuelpx = rgdx.param(gdxPath,'SIM_FUELPX')#fuel price (input) for central basin
