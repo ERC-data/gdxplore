@@ -375,6 +375,7 @@ processGDX <- function(gdxPath,gdxname){
   #tmp = merge(tmp,F_IN,all.x = TRUE)
   tmp$Case = myCase
   #tmp = tmp[,-8]#Remove 'Timeslices' column which only has annual
+  tradf = tradf[!(names(comdf) == 'Sector'),] #drop sector column - dont need
   tradf = droplevels(tmp)
   
   #COAL PRICES
@@ -387,16 +388,19 @@ processGDX <- function(gdxPath,gdxname){
   #INDUSTRY
   inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
   inddf$Case = myCase
+  indf = inddf[,!(names(comdf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
   inddf = droplevels(inddf)
   
   #RESIDENTIAL
   resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
   resdf$Case = myCase
+  resdf = resdf[,!(names(comdf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
   resdf = droplevels(resdf)
   
   #COMMERCIAL
   comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
   comdf$Case = myCase
+  comdf = comd[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
   comdf = droplevels(comdf)
   
   #CAP
