@@ -386,14 +386,17 @@ processGDX <- function(gdxPath,gdxname){
   
   #INDUSTRY
   inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
+  inddf$Case = myCase
   inddf = droplevels(inddf)
   
   #RESIDENTIAL
   resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
+  resdf$Case = myCase
   resdf = droplevels(resdf)
   
   #COMMERCIAL
   comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
+  comdf$Case = myCase
   comdf = droplevels(comdf)
   
   #CAP
