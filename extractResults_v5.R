@@ -112,6 +112,8 @@ processGDX <- function(gdxPath,gdxname){
   F_OUT = addCOMmap(F_OUT)
   F_OUT = droplevels(F_OUT)
   
+  VARACT = addPRCmap(VARACT)
+  VARACT = droplevels(VARACT)
   
   CST_INVC = addPRCmap(CST_INVC)
   CST_FIXC = addPRCmap(CST_FIXC)
@@ -383,21 +385,24 @@ processGDX <- function(gdxPath,gdxname){
   coalPrices = droplevels(tmp)
   
   #INDUSTRY
+  inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
+  inddf = droplevels(inddf)
   
   #RESIDENTIAL
+  resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
+  resdf = droplevels(resdf)
   
   #COMMERCIAL
-  
-  #OTHERS
+  comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
+  comdf = droplevels(comdf)
   
   #CAP
   #VARACT
   VARACT$Case = myCase
   VARACT = droplevels(addPRCmap(VARACT))
-  #TotalFinal
   
   #Combine into list:
-  masterlist = list(pwrdf,tradf,coalPrices,VARACT)
+  masterlist = list(pwrdf,tradf,coalPrices,VARACT,inddf,resdf,comdf)
   
   print('DONE PROCESSING!')
   return(masterlist)
