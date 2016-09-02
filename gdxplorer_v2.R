@@ -6,7 +6,7 @@ library(shiny)
 #rdsfilepath = "http://energydata.uct.ac.za/dataset/1db4d94d-867e-4706-a26e-b4600fee594b/resource/395efb75-30ae-4df1-b080-b7b3aabdb4fa/download/processedtestprojname24aug2016.rds"
 
 #local:
-rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scens_processed_01Sep2016.rds'
+rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scens_processed_02Sep2016.rds'
 #'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
 
 tmplist = list()
