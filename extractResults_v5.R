@@ -323,19 +323,20 @@ processGDX <- function(gdxPath,gdxname){
   
   #add FOUT
   passengerkmAll = merge(passengerOccupancy,F_OUT)#this will cut out all non-milestone years
-  passengerkmAll = passengerkmAll[,names(passengerkmAll) != 'Sector']
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice','Commodity_Name'))]#drop the timeslice column
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice','Commodity_Name'))]#drop redundant columns
   passengerkmAll$bpkm_fout = passengerkmAll$Occupancy*passengerkmAll$F_OUT
   names(passengerkmAll)[1] = 'TRA_commodity'
   
   #add F_IN 
   passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region','Subsector','Subsubsector'),by.y = c('Process','Year','Region','Subsector','Subsubsector'))
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice','Commodity_Name'))]#drop redundant columns
+  
   #add mapping
   passengerkmAll = addPRCmap(passengerkmAll)
   passengerkmAll = droplevels(passengerkmAll)
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice','Commodity_Name'))]#drop redundant columns
   
-  #Freight
+  #FREIGHT
   freightModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='FreightModes')
   tonkm = rgdx.param(gdxPath,'Tonkm')
   
@@ -347,7 +348,7 @@ processGDX <- function(gdxPath,gdxname){
   freightLoad = freightLoad%>% mutate(load = btkm/bvkm)
   
   tonkmAll = merge(freightLoad,F_OUT)
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Commodity_Name','Sector','Timeslice'))]#drop the timeslice column
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Commodity_Name','Sector'))]#drop the timeslice column
   tonkmAll$btkm_fout = tonkmAll$load*tonkmAll$F_OUT
   names(tonkmAll)[1] = 'TRA_commodity' # for distinguishing later in the pivottables
   #add FIN
@@ -356,7 +357,7 @@ processGDX <- function(gdxPath,gdxname){
   #add mapping
   tonkmAll = addPRCmap(tonkmAll)
   tonkmAll = droplevels(tonkmAll)
-  
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Commodity_Name','Sector'))]#drop the timeslice column
   
   #Combine relavant dataframes and lists
   print('Combining dataframes into relavent sections')
