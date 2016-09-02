@@ -400,7 +400,7 @@ processGDX <- function(gdxPath,gdxname){
   #COMMERCIAL
   comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
   comdf$Case = myCase
-  comdf = comd[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
+  comdf = comdf[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
   comdf = droplevels(comdf)
   
   #CAP
