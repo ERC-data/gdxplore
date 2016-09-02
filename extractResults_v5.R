@@ -323,12 +323,13 @@ processGDX <- function(gdxPath,gdxname){
   
   #add FOUT
   passengerkmAll = merge(passengerOccupancy,F_OUT)#this will cut out all non-milestone years
-  
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  passengerkmAll = passengerkmAll[,names(passengerkmAll) != 'Sector']
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice','Commodity_Name'))]#drop the timeslice column
   passengerkmAll$bpkm_fout = passengerkmAll$Occupancy*passengerkmAll$F_OUT
   names(passengerkmAll)[1] = 'TRA_commodity'
+  
   #add F_IN 
-  passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region'),by.y = c('Process','Year','Region'))
+  passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region','Subsector','Subsubsector'),by.y = c('Process','Year','Region','Subsector','Subsubsector'))
   passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
   #add mapping
   passengerkmAll = addPRCmap(passengerkmAll)
