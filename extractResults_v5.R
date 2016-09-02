@@ -1,6 +1,6 @@
 
-#17 Aug 2016
-#This is the processing fucntion for gdx's and for use in the GDXplorer pivotable
+#This script contains the functions for reading in GDX files and extracting results and processing other results
+#it returns a list of the results for the GDX file name. 
 
 addPRCmap <- function(db){
   #this function gets the mapPRC dataset from the csv file which should be in your workdir
@@ -121,16 +121,23 @@ processGDX <- function(gdxPath,gdxname){
     summarise(Capacity = sum(CAPL,RESID))
   CAP_T = addPRCmap(CAP_T)
   
-  if(0){#NEEDS FIXING
-    #totalFinal = sum of all fuels over all sectors. one value for each year
-    totalFinal <- F_IN[F_IN$Commodity_Name%in% fuels&F_IN$Sector != ''&F_IN$Commodity_Name !='',] %>%
-      group_by(Region,Year,Commodity_Name)%>%
-      summarise(totalFinal = sum(F_IN))
+  #ENERGY SHARES
+  fuels = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='Fuels')
+ 
+  #totalFinal = sum of all fuels over all sectors. one value for each year
+    CINPL1F <- F_IN[F_IN$Sector != ''&F_IN$Commodity_Name != ''&F_IN$Commodity_Name %in% fuels$Fuels,]%>%
+    group_by(Region,Year,Sector,Commodity_Name)%>%
+    summarise(total_in = sum(F_IN))
+    
+    totalFinal <- CINPL1F %>%
+      group_by(Region,Year)%>%
+      summarise(final = sum(total_in))
     
     #coalfinal. Note that this excludes exports (the supply sector)
     coalFinal = F_IN[F_IN$Commodity_Name == 'Coal'& !(F_IN$Sector %in% c('','Supply')),] %>%
       group_by(Region,Year)%>%
       summarise(CoalTotal = sum(F_IN))
+    
     #coalsharefinal 
     coalShareFinal = coalFinal
     coalShareFinal$CoalShare = coalShareFinal$CoalTotal/totalFinal$totalFinal
@@ -147,8 +154,6 @@ processGDX <- function(gdxPath,gdxname){
     fossilShareFinal = gasShareFinal
     fossilShareFinal$FossilShare = fossilShareFinal$GasShare + coalShareFinal$CoalShare
     fossilShareFinal = fossilShareFinal[,-c(3,4)]
-    
-  }
   
   #Average coal prices. NEEDS SIM inputs  
   print('Calculating Average coal prices')
