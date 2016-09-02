@@ -9,7 +9,6 @@ library(shiny)
 rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scens_processed_01Sep2016.rds'
 #'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
 
-
 tmplist = list()
 pwrdf = data.frame()
 tradf = data.frame()
@@ -35,5 +34,5 @@ for (i in 1:n){
   #comdf = rbind(comdf, as.data.frame(tmplist[[i]][4]))
 }
 
-runApp(paste(workdir,'/ShinyApp/',sep =''))
+runApp(paste(getwd(),'/ShinyApp/',sep =''))
 
