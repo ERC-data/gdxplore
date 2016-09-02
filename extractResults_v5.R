@@ -347,13 +347,12 @@ processGDX <- function(gdxPath,gdxname){
   freightLoad = freightLoad%>% mutate(load = btkm/bvkm)
   
   tonkmAll = merge(freightLoad,F_OUT)
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Commodity_Name','Sector','Timeslice'))]#drop the timeslice column
   tonkmAll$btkm_fout = tonkmAll$load*tonkmAll$F_OUT
   names(tonkmAll)[1] = 'TRA_commodity' # for distinguishing later in the pivottables
   #add FIN
-  tonkmAll = merge(tonkmAll,F_IN,by.x = c('Process','Year','Region'),by.y = c('Process','Year','Region'))
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice'))]#drop the timeslice column
-  
+  tonkmAll = merge(tonkmAll,F_IN)
+
   #add mapping
   tonkmAll = addPRCmap(tonkmAll)
   tonkmAll = droplevels(tonkmAll)
