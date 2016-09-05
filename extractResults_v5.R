@@ -112,6 +112,8 @@ processGDX <- function(gdxPath,gdxname){
   F_OUT = addCOMmap(F_OUT)
   F_OUT = droplevels(F_OUT)
   
+  VARACT = addPRCmap(VARACT)
+  VARACT = droplevels(VARACT)
   
   CST_INVC = addPRCmap(CST_INVC)
   CST_FIXC = addPRCmap(CST_FIXC)
@@ -321,18 +323,20 @@ processGDX <- function(gdxPath,gdxname){
   
   #add FOUT
   passengerkmAll = merge(passengerOccupancy,F_OUT)#this will cut out all non-milestone years
-  
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice','Commodity_Name'))]#drop redundant columns
   passengerkmAll$bpkm_fout = passengerkmAll$Occupancy*passengerkmAll$F_OUT
   names(passengerkmAll)[1] = 'TRA_commodity'
+  
   #add F_IN 
-  passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region'),by.y = c('Process','Year','Region'))
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region','Subsector','Subsubsector'),by.y = c('Process','Year','Region','Subsector','Subsubsector'))
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice'))]#drop redundant columns
+  
   #add mapping
   passengerkmAll = addPRCmap(passengerkmAll)
   passengerkmAll = droplevels(passengerkmAll)
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice'))]#drop redundant columns
   
-  #Freight
+  #FREIGHT
   freightModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='FreightModes')
   tonkm = rgdx.param(gdxPath,'Tonkm')
   
@@ -344,17 +348,16 @@ processGDX <- function(gdxPath,gdxname){
   freightLoad = freightLoad%>% mutate(load = btkm/bvkm)
   
   tonkmAll = merge(freightLoad,F_OUT)
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector','Commodity_Name'))]#drop the timeslice column
   tonkmAll$btkm_fout = tonkmAll$load*tonkmAll$F_OUT
   names(tonkmAll)[1] = 'TRA_commodity' # for distinguishing later in the pivottables
   #add FIN
-  tonkmAll = merge(tonkmAll,F_IN,by.x = c('Process','Year','Region'),by.y = c('Process','Year','Region'))
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice'))]#drop the timeslice column
-  
+  tonkmAll = merge(tonkmAll,F_IN)
+
   #add mapping
   tonkmAll = addPRCmap(tonkmAll)
   tonkmAll = droplevels(tonkmAll)
-  
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector'))]#drop the timeslice column
   
   #Combine relavant dataframes and lists
   print('Combining dataframes into relavent sections')
@@ -373,6 +376,7 @@ processGDX <- function(gdxPath,gdxname){
   #tmp = merge(tmp,F_IN,all.x = TRUE)
   tmp$Case = myCase
   #tmp = tmp[,-8]#Remove 'Timeslices' column which only has annual
+  tmp = tmp[!(names(tmp) == 'Sector'),] #drop sector column - dont need
   tradf = droplevels(tmp)
   
   #COAL PRICES
@@ -383,21 +387,30 @@ processGDX <- function(gdxPath,gdxname){
   coalPrices = droplevels(tmp)
   
   #INDUSTRY
+  inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
+  inddf$Case = myCase
+  inddf = inddf[,!(names(inddf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
+  inddf = droplevels(inddf)
   
   #RESIDENTIAL
+  resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
+  resdf$Case = myCase
+  resdf = resdf[,!(names(resdf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
+  resdf = droplevels(resdf)
   
   #COMMERCIAL
-  
-  #OTHERS
+  comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
+  comdf$Case = myCase
+  comdf = comdf[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
+  comdf = droplevels(comdf)
   
   #CAP
   #VARACT
   VARACT$Case = myCase
   VARACT = droplevels(addPRCmap(VARACT))
-  #TotalFinal
   
   #Combine into list:
-  masterlist = list(pwrdf,tradf,coalPrices,VARACT)
+  masterlist = list(pwrdf,tradf,coalPrices,VARACT,inddf,resdf,comdf)
   
   print('DONE PROCESSING!')
   return(masterlist)
