@@ -39,5 +39,5 @@ for (i in 1:n){
   comdf = rbind(comdf, as.data.frame(tmplist[[i]][7]))
 }
 
-runApp(paste(getwd(),'/ShinyApp/',sep =''))
+#runApp(paste(getwd(),'/ShinyApp/',sep =''))
 
