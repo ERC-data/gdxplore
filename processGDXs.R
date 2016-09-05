@@ -17,16 +17,18 @@ library(XLConnect)
 #     run processing on this file + append to existing then:
 # run GDXplorer shiny
 
-projname = "TestProjname"
+projname = "student_3scens"
 
 # location of your GAMS main directory. 
 GAMS_lib_dir = 'C:/GAMS/win64/24.7' 
 
 #main working directory for this file/script and colourcoding files etc. 
-workdir = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/'
+workdir = 'C:/Users/01425453/Documents/R/gdxplore/'
 
 #the GDX files location
-gdxLocation <- 'C:/Users/01425453/Desktop/gdx test/'
+gdxLocation = 'C:/Users/01425453/Desktop/Student R layout/GDXfiles/'
+saverdspath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/'
+
 #'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/Transport/'
 #'C:/AnswerTIMESv6/Gams_WrkTI-MC/Gamssave/'#'C:/Users/01425453/Desktop/SATM_TR_results/'#
 
@@ -54,8 +56,8 @@ for (i in (1:N)){
   if(i ==N){
     print('saving RDS file')
     dt = format(Sys.time(), "%d%b%Y")
-    rdsname = paste(paste('processed_',projname,sep = ''),dt,sep ='_')
-    saveRDS(tmplist,paste(workdir,paste(rdsname,'.rds',sep = '')))
+    rdsname = paste(paste(projname,'processed',sep = '_'),dt,sep ='_')
+    saveRDS(tmplist,paste(saverdspath,paste(rdsname,'.rds',sep = ''),sep = ''))
     print('saving complete')
     
     #now have a list of lists - one list for each gdx

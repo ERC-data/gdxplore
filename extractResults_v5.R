@@ -1,6 +1,6 @@
 
-#17 Aug 2016
-#This is the processing fucntion for gdx's and for use in the GDXplorer pivotable
+#This script contains the functions for reading in GDX files and extracting results and processing other results
+#it returns a list of the results for the GDX file name. 
 
 addPRCmap <- function(db){
   #this function gets the mapPRC dataset from the csv file which should be in your workdir
@@ -108,6 +108,13 @@ processGDX <- function(gdxPath,gdxname){
   F_IN = addCOMmap(F_IN)
   F_IN = droplevels(F_IN)
   
+  F_OUT = addPRCmap(F_OUT)
+  F_OUT = addCOMmap(F_OUT)
+  F_OUT = droplevels(F_OUT)
+  
+  VARACT = addPRCmap(VARACT)
+  VARACT = droplevels(VARACT)
+  
   CST_INVC = addPRCmap(CST_INVC)
   CST_FIXC = addPRCmap(CST_FIXC)
   CST_ACTC = addPRCmap(CST_ACTC)
@@ -121,35 +128,53 @@ processGDX <- function(gdxPath,gdxname){
     summarise(Capacity = sum(CAPL,RESID))
   CAP_T = addPRCmap(CAP_T)
   
-  if(0){#NEEDS FIXING
-    #totalFinal = sum of all fuels over all sectors. one value for each year
-    totalFinal <- F_IN[F_IN$Commodity_Name%in% fuels&F_IN$Sector != ''&F_IN$Commodity_Name !='',] %>%
-      group_by(Region,Year,Commodity_Name)%>%
-      summarise(totalFinal = sum(F_IN))
+  #ENERGY SHARES
+  fuels = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='Fuels')
+ 
+  #totalFinal = sum of all fuels over all sectors. one value for each year
+    CINPL1F <- F_IN[F_IN$Sector != ''&F_IN$Commodity_Name != ''&F_IN$Commodity_Name %in% fuels$Fuels,]%>%
+    group_by(Region,Year,Sector,Commodity_Name)%>%
+    summarise(total_in = sum(F_IN))
+    
+    totalFinal <- CINPL1F %>%
+      group_by(Region,Year)%>%
+      summarise(final = sum(total_in))
     
     #coalfinal. Note that this excludes exports (the supply sector)
     coalFinal = F_IN[F_IN$Commodity_Name == 'Coal'& !(F_IN$Sector %in% c('','Supply')),] %>%
       group_by(Region,Year)%>%
       summarise(CoalTotal = sum(F_IN))
+    
     #coalsharefinal 
-    coalShareFinal = coalFinal
-    coalShareFinal$CoalShare = coalShareFinal$CoalTotal/totalFinal$totalFinal
+    coalShareFinal = merge(coalFinal,totalFinal)
+    coalShareFinal$CoalShare = coalShareFinal$CoalTotal/coalShareFinal$final
+    coalShareFinal = coalShareFinal[,-c(3,4)]
     
     #gasfinal. Note that this excludes exports (the supply sector)
-    gasFinal = F_IN[F_IN$Commodity_Name == 'GAS'& !(F_IN$Sector %in% c('','Supply')),] %>%
+    gasFinal = F_IN[F_IN$Commodity_Name %in% c('GAS','Gas')&F_IN$Sector !='',] %>%
       group_by(Region,Year)%>%
       summarise(GasTotal = sum(F_IN))
     
-    gasShareFinal = gasFinal
-    gasShareFinal$GasShare = gasShareFinal$GasTotal/totalFinal$totalFinal
+    gasShareFinal = merge(gasFinal,totalFinal)
+    gasShareFinal$GasShare = gasShareFinal$GasTotal/gasShareFinal$final
+    gasShareFinal = gasShareFinal[,-c(3,4)]
+    
+    oilFinal = F_OUT[F_OUT$Commodity_Name == 'Crude Oil'&F_OUT$Sector == 'Supply',]%>% 
+      group_by(Region,Year)%>%
+      summarise(oilTotal = sum(F_OUT))
+    
+    oilShareFinal = merge(totalFinal,oilFinal) %>% mutate(oilshare = oilTotal/final)
+    oilShareFinal = oilShareFinal[,-c(3,4)]
+    
+    #Fossil totals
+    fossilTotals = merge(merge(coalFinal,gasFinal),oilFinal)
     
     #Fossil Share 
-    fossilShareFinal = gasShareFinal
-    fossilShareFinal$FossilShare = fossilShareFinal$GasShare + coalShareFinal$CoalShare
-    fossilShareFinal = fossilShareFinal[,-c(3,4)]
-    
-  }
+    fossilShareFinal = merge(merge(gasShareFinal,coalShareFinal),oilShareFinal)
+    fossilShareFinal = fossilShareFinal%>% mutate(totalFossilShare = GasShare+CoalShare+oilshare)
+    #fossilShareFinal = fossilShareFinal[,-c(3,4)]
   
+    
   #Average coal prices. NEEDS SIM inputs  
   print('Calculating Average coal prices')
   sim_fuelpx = rgdx.param(gdxPath,'SIM_FUELPX')#fuel price (input) for central basin
@@ -298,18 +323,20 @@ processGDX <- function(gdxPath,gdxname){
   
   #add FOUT
   passengerkmAll = merge(passengerOccupancy,F_OUT)#this will cut out all non-milestone years
-  
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice','Commodity_Name'))]#drop redundant columns
   passengerkmAll$bpkm_fout = passengerkmAll$Occupancy*passengerkmAll$F_OUT
   names(passengerkmAll)[1] = 'TRA_commodity'
+  
   #add F_IN 
-  passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region'),by.y = c('Process','Year','Region'))
-  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  passengerkmAll = merge(passengerkmAll,F_IN,by.x = c('Process','Year','Region','Subsector','Subsubsector'),by.y = c('Process','Year','Region','Subsector','Subsubsector'))
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice'))]#drop redundant columns
+  
   #add mapping
   passengerkmAll = addPRCmap(passengerkmAll)
   passengerkmAll = droplevels(passengerkmAll)
+  passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice'))]#drop redundant columns
   
-  #Freight
+  #FREIGHT
   freightModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='FreightModes')
   tonkm = rgdx.param(gdxPath,'Tonkm')
   
@@ -321,17 +348,16 @@ processGDX <- function(gdxPath,gdxname){
   freightLoad = freightLoad%>% mutate(load = btkm/bvkm)
   
   tonkmAll = merge(freightLoad,F_OUT)
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice'))]#drop the timeslice column
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector','Commodity_Name'))]#drop the timeslice column
   tonkmAll$btkm_fout = tonkmAll$load*tonkmAll$F_OUT
   names(tonkmAll)[1] = 'TRA_commodity' # for distinguishing later in the pivottables
   #add FIN
-  tonkmAll = merge(tonkmAll,F_IN,by.x = c('Process','Year','Region'),by.y = c('Process','Year','Region'))
-  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice'))]#drop the timeslice column
-  
+  tonkmAll = merge(tonkmAll,F_IN)
+
   #add mapping
   tonkmAll = addPRCmap(tonkmAll)
   tonkmAll = droplevels(tonkmAll)
-  
+  tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector'))]#drop the timeslice column
   
   #Combine relavant dataframes and lists
   print('Combining dataframes into relavent sections')
@@ -350,6 +376,7 @@ processGDX <- function(gdxPath,gdxname){
   #tmp = merge(tmp,F_IN,all.x = TRUE)
   tmp$Case = myCase
   #tmp = tmp[,-8]#Remove 'Timeslices' column which only has annual
+  tmp = tmp[!(names(tmp) == 'Sector'),] #drop sector column - dont need
   tradf = droplevels(tmp)
   
   #COAL PRICES
@@ -360,21 +387,30 @@ processGDX <- function(gdxPath,gdxname){
   coalPrices = droplevels(tmp)
   
   #INDUSTRY
+  inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
+  inddf$Case = myCase
+  inddf = inddf[,!(names(inddf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
+  inddf = droplevels(inddf)
   
   #RESIDENTIAL
+  resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
+  resdf$Case = myCase
+  resdf = resdf[,!(names(resdf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
+  resdf = droplevels(resdf)
   
   #COMMERCIAL
-  
-  #OTHERS
+  comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
+  comdf$Case = myCase
+  comdf = comdf[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
+  comdf = droplevels(comdf)
   
   #CAP
   #VARACT
   VARACT$Case = myCase
   VARACT = droplevels(addPRCmap(VARACT))
-  #TotalFinal
   
   #Combine into list:
-  masterlist = list(pwrdf,tradf,coalPrices,VARACT)
+  masterlist = list(pwrdf,tradf,coalPrices,VARACT,inddf,resdf,comdf)
   
   print('DONE PROCESSING!')
   return(masterlist)

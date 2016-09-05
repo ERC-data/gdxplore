@@ -1,17 +1,28 @@
 
 library(shiny)
+#this 
 
-rdsfilepath = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
-#Bryce's comment...
+#CKAN: 
+#rdsfilepath = "http://energydata.uct.ac.za/dataset/1db4d94d-867e-4706-a26e-b4600fee594b/resource/395efb75-30ae-4df1-b080-b7b3aabdb4fa/download/processedtestprojname24aug2016.rds"
 
-N = length(gdxlist) 
+#local:
+rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scens_processed_02Sep2016.rds'
+#'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
+
 tmplist = list()
 pwrdf = data.frame()
 tradf = data.frame()
+resdf = data.frame()
+inddf = data.frame()
+comdf  = data.frame()
 clpricesdf = data.frame()
 varactdf = data.frame()
 
+#local 
 tmplist = readRDS(rdsfilepath)
+
+#CKAN
+#tmplist = readRDS(gzcon(url(rdsfilepath)))
 
 print('Appending pivottable dataframe from each case...')
 #now have a list of lists - one list for each gdx
@@ -23,8 +34,10 @@ for (i in 1:n){
   tradf = rbind(tradf,as.data.frame(tmplist[[i]][2]))
   clpricesdf = rbind(clpricesdf, as.data.frame(tmplist[[i]][3]))
   varactdf = rbind(varactdf, as.data.frame(tmplist[[i]][4]))
-  #comdf = rbind(comdf, as.data.frame(tmplist[[i]][4]))
+  inddf = rbind(inddf,as.data.frame(tmplist[[i]][5]))
+  resdf = rbind(resdf,as.data.frame(tmplist[[i]][6]))
+  comdf = rbind(comdf, as.data.frame(tmplist[[i]][7]))
 }
 
-runApp(paste(workdir,'/ShinyApp/',sep =''))
+#runApp(paste(getwd(),'/ShinyApp/',sep =''))
 
