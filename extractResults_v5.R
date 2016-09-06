@@ -106,6 +106,7 @@ processGDX <- function(gdxPath,gdxname){
   #add mapping 
   F_IN = addPRCmap(F_IN)
   F_IN = addCOMmap(F_IN)
+  F_IN = F_IN[F_IN$Commodity_Name != 'Water',]#REMOVING WATER FOR NOW
   F_IN = droplevels(F_IN)
   
   F_OUT = addPRCmap(F_OUT)
@@ -128,6 +129,12 @@ processGDX <- function(gdxPath,gdxname){
     summarise(Capacity = sum(CAPL,RESID))
   CAP_T = addPRCmap(CAP_T)
   
+  #ACTIVITY SHARES
+    tmp = as.data.table(VARACT)
+    vardts = tmp[,.(Vsector_sum = sum(VAR_ACT)),by = .(Year,Sector)] #Sum by sector
+    vardf = merge(VARACT,as.data.frame(vardts))%>% mutate(VAR_ACTshare = VAR_ACT/Vsector_sum)
+    vardf = vardf[,!(names(vardf)%in% c('Vsector_sum'))]
+    
   #ENERGY SHARES
   fuels = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='Fuels')
  
@@ -359,58 +366,178 @@ processGDX <- function(gdxPath,gdxname){
   tonkmAll = droplevels(tonkmAll)
   tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector'))]#drop the timeslice column
   
+  
+  
+  
+  #-----------------------------------
   #Combine relavant dataframes and lists
-  print('Combining dataframes into relavent sections')
-  #POWER SECTOR
-  tmp = merge(CAP_T,NCAPL,all = TRUE)#add capacity
-  #tmp = merge(tmp,F_IN,all.x = TRUE)#add flow in 
-  tmp = merge(tmp,CST_INVC,all.x = TRUE)#add investments
-  tmp = merge(tmp,ERPRICE)#add elec price
-  tmp = addPRCmap(tmp)#add mapping
-  tmp = tmp[tmp$Sector == 'Power',]
-  tmp$Case = myCase
-  pwrdf = droplevels(tmp)
+  print('Combining dataframes into relavent sections...')
   
-  #TRANSPORT
-  tmp = merge(tonkmAll,passengerkmAll,all = TRUE)
-  #tmp = merge(tmp,F_IN,all.x = TRUE)
-  tmp$Case = myCase
-  #tmp = tmp[,-8]#Remove 'Timeslices' column which only has annual
-  tmp = tmp[!(names(tmp) == 'Sector'),] #drop sector column - dont need
-  tradf = droplevels(tmp)
-  
-  #COAL PRICES
-  tmp = merge(avgcoalprice,avgcoalpriceA,all = TRUE)
-  tmp = merge(tmp,avgcoalpriceCB,all = TRUE)
-  
-  tmp$Case = myCase
-  coalPrices = droplevels(tmp)
-  
-  #INDUSTRY
-  inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
-  inddf$Case = myCase
-  inddf = inddf[,!(names(inddf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
-  inddf = droplevels(inddf)
-  
-  #RESIDENTIAL
-  resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
-  resdf$Case = myCase
-  resdf = resdf[,!(names(resdf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
-  resdf = droplevels(resdf)
-  
-  #COMMERCIAL
-  comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
-  comdf$Case = myCase
-  comdf = comdf[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
-  comdf = droplevels(comdf)
-  
-  #CAP
-  #VARACT
-  VARACT$Case = myCase
-  VARACT = droplevels(addPRCmap(VARACT))
-  
+    #POWER SECTOR - total capacity
+    print('...power')
+    pwr1 = CAP_T[CAP_T$Sector == 'Power',] 
+    pwr1$Case = myCase
+    pwr1 = pwr1[,!(names(pwr1)%in% c('Subsubsector'))]
+    pwr1 = droplevels(pwr1)
+    
+    #POWER SECTOR - NEW capacity
+    pwr2 = addPRCmap(NCAPL)
+    pwr2 = pwr2[pwr2$Sector == 'Power',]
+    pwr2$Case = myCase
+    pwr2 = droplevels(pwr2)
+    
+    #POWER SECTOR - flows
+    pwr3 = merge(vardf,F_IN,all.x = TRUE)
+    pwr3 = pwr3[pwr3$Sector =='Power',!(names(pwr3) %in% c('Timeslice'))] #drop timeslices
+    pwr3$Case = myCase
+    pwr3[is.na(pwr3)] = 0
+    pwr3 = droplevels(pwr3)
+    
+    #POWER SECTOR - costs
+    pwr4 = merge(merge(CST_INVC,CST_ACTC),CST_FIXC)
+    pwr4 = pwr4[pwr4$Sector == 'Power',]
+    
+    pwr4$Case = myCase
+    pwr4 = droplevels(pwr4)
+    
+    tmp = merge(CAP_T,NCAPL,all = TRUE)#add capacity
+    tmp = merge(tmp,CST_INVC,all.x = TRUE)#add investments
+    tmp = merge(tmp,ERPRICE)#add elec price
+    tmp = addPRCmap(tmp)#add mapping
+    tmp = tmp[tmp$Sector == 'Power',]
+    tmp$Case = myCase
+    pwrdf = droplevels(tmp)
+    
+    #TRANSPORT
+    print('...transport')
+    tmp = merge(tonkmAll,passengerkmAll,all = TRUE)
+    #tmp = merge(tmp,F_IN,all.x = TRUE)
+    tmp$Case = myCase
+    #tmp = tmp[,-8]#Remove 'Timeslices' column which only has annual
+    tmp = tmp[!(names(tmp) == 'Sector'),] #drop sector column - dont need
+    tradf = droplevels(tmp)
+    
+    tra_flows = merge(vardf[vardf$Sector =='Transport',],F_IN)
+    tra_flows = merge(tra_flows,passengerkmAll[,names(passengerkmAll)%in%c('Year','Process','bpkm_fout')],all.x = T)
+    tra_flows =merge(tra_flows,tonkmAll[,names(tonkmAll)%in% c('Year','Process','btkm_fout')],all.x = T)
+    tra_flows[is.na(tra_flows)] = 0
+    tra_flows = tra_flows[,!(names(tra_flows)%in% c('Sector','Timeslice'))]
+    tra_flows$Case = myCase
+    tra_flows = droplevels(tra_flows)
+    
+    tra_costs = CST_INVC[CST_INVC$Sector =='Transport',]
+    tra_costs = tra_costs[,!(names(tra_costs)%in% c('Sector','Timeslice'))]
+    tra_costs$Case = myCase
+    tra_costs = droplevels(tra_costs)
+    
+    tra_cap = CAP_T[CAP_T$Sector =='Transport',]
+    tra_cap$Case = myCase
+    tra_cap = tra_cap[,!(names(tra_cap)%in% c('Sector'))]
+    tra_cap = droplevels(tra_cap)
+    
+    NCAPL = addPRCmap(NCAPL)
+    tra_ncap = NCAPL[NCAPL$Sector =='Transport',]
+    tra_ncap$Case = myCase
+    tra_ncap = tra_ncap[,!(names(tra_ncap)%in% c('Sector'))]
+    tra_ncap = droplevels(tra_ncap)
+    
+    #REFINERIES
+    print('...refineries')
+    refs_flows = merge(VARACT[VARACT$Sector =='Refineries',],F_IN)
+    refs_flows[is.na(refs_flows)] = 0
+    refs_flows = refs_flows[,!(names(refs_flows)%in% c('Sector','Timeslice'))]
+    refs_flows$Case = myCase
+    refs_flows[duplicated(paste(paste(refs_flows$VAR_ACT,refs_flows$Process),refs_flows$Year)),'VAR_ACT'] = 0# we get duplicate var_act for each F_IN commodity, make the duplicates 0 (except one of them)
+    refs_flows = droplevels(refs_flows)
+    
+    refs_costs = CST_INVC[CST_INVC$Sector =='Refineries',]
+    refs_costs = refs_costs[,!(names(refs_costs)%in% c('Sector','Timeslice'))]
+    refs_costs$Case = myCase
+    refs_costs = droplevels(refs_costs)
+    
+    refs_cap = CAP_T[CAP_T$Sector =='Refineries',]
+    refs_cap$Case = myCase
+    refs_cap = refs_cap[,!(names(refs_cap)%in% c('Sector'))]
+    refs_cap = droplevels(refs_cap)
+    
+    NCAPL = addPRCmap(NCAPL)
+    refs_ncap = NCAPL[NCAPL$Sector =='Refineries',]
+    refs_ncap$Case = myCase
+    refs_ncap = refs_ncap[,!(names(refs_ncap)%in% c('Sector'))]
+    refs_ncap = droplevels(refs_ncap)
+    
+    #COAL PRICES
+    tmp = merge(avgcoalprice,avgcoalpriceA,all = TRUE)
+    tmp = merge(tmp,avgcoalpriceCB,all = TRUE)
+    
+    tmp$Case = myCase
+    coalPrices = droplevels(tmp)
+    
+    #INDUSTRY
+    print('...industry')
+    ind_flows = merge(vardf[vardf$Sector == 'Industry',],F_IN[F_IN$Sector =='Industry',])
+    ind_flows = ind_flows[,!(names(ind_flows)%in% c('Sector','Timeslice'))]
+    ind_flows$Case = myCase
+    ind_flows = droplevels(ind_flows)
+    
+    ind_costs = merge(merge(CST_INVC,CST_FIXC,all.x = TRUE),CST_ACTC,all.x = TRUE)
+    ind_costs = ind_costs[ind_costs$Sector =="Industry",!(names(ind_costs) %in% c('Sector','Timeslice'))]
+    ind_costs[is.na(ind_costs)] = 0
+    ind_costs$Case = myCase
+    ind_costs = droplevels(ind_costs)
+    
+    inddf = merge(VARACT[VARACT$Sector == 'Industry',],F_IN[F_IN$Sector == 'Industry',])
+    inddf$Case = myCase
+    inddf = inddf[,!(names(inddf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
+    inddf = droplevels(inddf)
+    
+    #RESIDENTIAL
+    print('...residential')
+    resdf = merge(VARACT[VARACT$Sector == 'Residential',],F_IN[F_IN$Sector == 'Residential',])
+    resdf$Case = myCase
+    resdf = resdf[,!(names(resdf) %in% c('Sector','Timeslice'))] #drop sector column - dont need
+    resdf = droplevels(resdf)
+    
+    res_flows = merge(F_IN,vardf)
+    res_flows = res_flows[res_flows$Sector =='Residential',!(names(res_flows) %in%c('Sector','Timeslice'))] #drop sector and timeslices
+    res_flows$Case = myCase
+    res_flows = droplevels(res_flows)
+    
+    res_cost = merge(CST_INVC,CST_FIXC)
+    res_cost = res_cost[res_cost$Sector =='Residential',]
+    res_cost = res_cost[,-4] #drop sector column
+    res_cost = res_cost %>% mutate(Allcosts = CST_INVC+CST_FIXC)
+    res_cost = res_cost[,-c(6,7)]
+    res_cost$Case = myCase
+    res_cost = droplevels(res_cost)
+    
+    #COMMERCIAL
+    print('...commercial')
+    comdf = merge(VARACT[VARACT$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
+    comdf$Case = myCase
+    comdf = comdf[,!(names(comdf) %in% c('Sector','Timeslice'))]#drop sector column - dont need
+    comdf = droplevels(comdf)
+    
+    com_flows = merge(vardf[vardf$Sector == 'Commerce',],F_IN[F_IN$Sector == 'Commerce',])
+    com_flows = com_flows[,!(names(com_flows) %in%c('Sector','Timeslice'))]
+    com_flows$Case = myCase
+    com_flows = droplevels(com_flows)
+    
+    com_costs = merge(merge(CST_INVC[CST_INVC$Sector =='Commerce',],CST_FIXC,all.x = TRUE),CST_ACTC,all.x = TRUE)
+    com_costs = com_costs[,!(names(com_costs) %in%c('Sector','Timeslice'))]
+    com_costs[is.na(com_costs)] = 0
+    com_costs$Case = myCase
+    com_costs = droplevels(com_costs)
+    
+    #CAP
+    #VARACT
+    VARACT$Case = myCase
+    VARACT = droplevels(addPRCmap(VARACT))
+    
   #Combine into list:
-  masterlist = list(pwrdf,tradf,coalPrices,VARACT,inddf,resdf,comdf)
+  masterlist = list(pwrdf,pwr1,pwr2,pwr3,pwr4,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
+                    resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
+                    refs_flows,refs_costs,refs_cap,refs_ncap)
   
   print('DONE PROCESSING!')
   return(masterlist)
