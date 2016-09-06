@@ -1,31 +1,33 @@
 library(shiny)
 library(rpivotTable)
 
-# Define UI for application that draws a histogram
-
-
-shinyUI(fluidPage(
-  # Application title
-  titlePanel("GDXplorer"),
-  #sidebarLayout(
-  #  sidebarPanel(
-  #    fileInput('prcgdxfilepath', 'Choose File',accept=c('text/gdx','.gdx'))
-  #    ),
-    mainPanel(
-      tabsetPanel(
-        tabPanel("Power",rpivotTableOutput("pwrpivottable")),
-        tabPanel("Industry",rpivotTableOutput("indpivottable")),
-        tabPanel('Transport',rpivotTableOutput('trapivottable')),
-        tabPanel('Residential',rpivotTableOutput('respivottable')),
-        tabPanel('Commerce',rpivotTableOutput('compivottable')),
+shinyUI(navbarPage("GDXplorer",tabPanel('Power',
+                                        tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('pwr1pivottable')),
+                                                    tabPanel('New Capacity',rpivotTableOutput('pwr2pivottable')),
+                                                    tabPanel('Flows',rpivotTableOutput('pwr3pivottable')),
+                                                    tabPanel('Costs',rpivotTableOutput('pwr4pivottable')) )),
+        tabPanel("Residential",
+                 tabsetPanel(tabPanel('Flows',rpivotTableOutput('resfpivottable')),
+                             tabPanel('Costs',rpivotTableOutput('rescpivottable')))),
+        tabPanel("Industry",
+                 tabsetPanel(tabPanel('Flows',rpivotTableOutput('indfpivottable')),
+                             tabPanel('Costs',rpivotTableOutput('indcpivottable')))),
+        tabPanel("Refineries",
+                 tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('refcappivottable')),
+                             tabPanel('New Capacity',rpivotTableOutput('refncappivottable')),
+                             tabPanel('Flows',rpivotTableOutput('reffpivottable')),
+                             tabPanel('Costs',rpivotTableOutput('refcpivottable')))),
+        tabPanel("Transport",
+                 tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('tracappivottable')),
+                             tabPanel('New Capacity',rpivotTableOutput('trancappivottable')),
+                             tabPanel('Flows',rpivotTableOutput('trafpivottable')),
+                             tabPanel('Costs',rpivotTableOutput('tracpivottable')))),
+        tabPanel("Commerce",
+                 tabsetPanel(tabPanel('Flows',rpivotTableOutput('comfpivottable')),
+                             tabPanel('Costs',rpivotTableOutput('comcpivottable')))),
         tabPanel('VAR ACT',rpivotTableOutput('varpivottable')),
         tabPanel('Coal Prices',rpivotTableOutput('clprpivottable'))
-      )#tabsetpanel
+      )#navbarpage
       
-    )#main panel
-    )
-  )
-    
-  
-  
-#)
+)#main panel
+
