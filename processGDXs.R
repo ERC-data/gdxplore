@@ -6,7 +6,7 @@ library(reshape2)
 library(gdxrrw) 
 library(dplyr)
 library(rpivotTable)
-#library(data.table)
+library(data.table)
 library(shiny)
 library(XLConnect)
 
