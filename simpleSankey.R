@@ -1,14 +1,15 @@
 # Making a sankey diagram - basic testing
 
 library(networkD3)
-flowin = F_IN[F_IN$Year == 2006&F_IN$Sector != ''&F_IN$Commodity_Name != ''&F_IN$Commodity_Name != 'Water',names(F_IN)%in% c('Sector','Commodity_Name','F_IN')]
+myyear = 2050
+flowin = F_IN[F_IN$Year == myyear&!(F_IN$Sector %in% c('','Supply'))&F_IN$Commodity_Name != ''&F_IN$Commodity_Name != 'Water',names(F_IN)%in% c('Sector','Commodity_Name','F_IN')]
 flowin = flowin %>% group_by(Sector,Commodity_Name)%>%summarise(value = sum(F_IN))
 flowin = droplevels(flowin)
 flowin$dir = 'in'
 
 F_OUT = addCOMmap(F_OUT)
 F_OUT = addPRCmap(F_OUT)
-flowout = F_OUT[F_OUT$Year == 2006&F_OUT$Sector != ''&F_OUT$Commodity_Name != ''&F_OUT$Commodity_Name != 'Water',names(F_OUT)%in% c('Sector','Commodity_Name','F_OUT')]
+flowout = F_OUT[F_OUT$Year == myyear&!(F_OUT$Sector %in% c('','Supply'))&F_OUT$Commodity_Name != ''&F_OUT$Commodity_Name != 'Water',names(F_OUT)%in% c('Sector','Commodity_Name','F_OUT')]
 flowout = flowout %>% group_by(Sector,Commodity_Name)%>%summarise(value = sum(F_OUT))
 flowout = droplevels(flowout)
 flowout$dir = 'out'
@@ -42,10 +43,7 @@ mynodes = as.data.frame(mynodes$name)
 names(mynodes) = 'name'
 mynodes$name = as.character(mynodes$name)#why the fuck does R turn the character into a fucking factor???
 
-
-
-
 sankeyNetwork(Links = mylinks, Nodes = mynodes, Source = "source",
               Target = "target", Value = "value", NodeID = "name",
-              units = "TWh", fontSize = 12, nodeWidth = 30)
+              units = "PJ", fontSize = 12, nodeWidth = 30)
 
