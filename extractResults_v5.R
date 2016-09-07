@@ -20,6 +20,20 @@ addCOMmap <- function(db){
   return(db)
 }
 
+getEmisResults = function(df,srch,myCase,sbstr = 1){
+  #gets the associated emissions results from emis_results using the 'srch' criteria for process name
+  #sbstr is for either substringing the commodity name or not (0) - some commodities names dont need to be chopped up
+  print(paste('extracting emissions results for ',substr(srch,2,5)))
+  df = df[grepl(srch,df$Process),]
+  if(sbstr){
+    df$Commodity = substr(df$Commodity,4,8)}
+  
+  keep  =c('Region','Year','Process','Commodity','F_OUT')
+  df = df[,names(df)%in% keep]
+  df$Case = myCase
+  return(df)
+}
+
 processGDX <- function(gdxPath,gdxname){
   
   print(paste('Reading in parameters from GDX'))
@@ -534,10 +548,26 @@ processGDX <- function(gdxPath,gdxname){
     VARACT$Case = myCase
     VARACT = droplevels(addPRCmap(VARACT))
     
+    #GETTING EMISSIONS
+      emis_code = c('CH4S','CMOX','CO2S','N2OS','NMVS','NOXS','SOXS','CO2EQS','CH4S')
+      emis_code = paste(emis_code,collapse = '|')
+      tmp = F_OUT[,!(names(F_OUT)%in% 'F_OUT')]
+      tmp[] = lapply(tmp,as.character) #have to do this because of annoying R factor reassigns
+      emis_results = F_OUT[grepl(emis_code,F_OUT$Commodity),]
+      emis_results = merge(tmp,emis_results)
+      
+      refs_emis = getEmisResults(emis_results,'^U',myCase)
+      pwr_emis = getEmisResults(emis_results,'^XPWR',myCase)
+      sup_emis = getEmisResults(emis_results,'^MIN',myCase,0) 
+      com_emis = getEmisResults(emis_results,'^XCOM',myCase)
+      res_emis = getEmisResults(emis_results,'^XRES',myCase)
+      tra_emis = getEmisResults(emis_results,'^XTRA',myCase)
+      ind_emis = getEmisResults(emis_results,'^XIND',myCase)
+      
   #Combine into list:
   masterlist = list(pwrdf,pwr1,pwr2,pwr3,pwr4,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
                     resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
-                    refs_flows,refs_costs,refs_cap,refs_ncap)
+                    refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis)
   
   print('DONE PROCESSING!')
   return(masterlist)
