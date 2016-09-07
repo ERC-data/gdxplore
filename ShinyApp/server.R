@@ -63,6 +63,33 @@ shinyServer(function(input, output) {
     )
     
   })
+  
+  output$pwremispivottable <- renderRpivotTable({
+    rpivotTable(
+      pwr_emis,
+      rows='Commodity',
+      col = mycollist,
+      aggregatorName='Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_OUT',
+      rendererName = 'Stacked Bar Chart'
+    )
+    
+  })
+  
+  output$refemispivottable <- renderRpivotTable({
+    rpivotTable(
+      refs_emis,
+      rows='Commodity',
+      col = mycollist,
+      aggregatorName='Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_OUT',
+      rendererName = 'Stacked Bar Chart'
+    )
+    
+  })
+  
   output$resfpivottable <- renderRpivotTable({
     rpivotTable(
       res_flows,
