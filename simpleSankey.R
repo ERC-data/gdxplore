@@ -4,23 +4,45 @@ library(networkD3)
 flowin = F_IN[F_IN$Year == 2006&F_IN$Sector != ''&F_IN$Commodity_Name != ''&F_IN$Commodity_Name != 'Water',names(F_IN)%in% c('Sector','Commodity_Name','F_IN')]
 flowin = flowin %>% group_by(Sector,Commodity_Name)%>%summarise(value = sum(F_IN))
 flowin = droplevels(flowin)
-tmp1 = as.data.frame(unique(flowin[,1]));names(tmp1) = 'name'
-tmp2 = unique(flowin[,2]);names(tmp2) = 'name'
+flowin$dir = 'in'
+
+F_OUT = addCOMmap(F_OUT)
+F_OUT = addPRCmap(F_OUT)
+flowout = F_OUT[F_OUT$Year == 2006&F_OUT$Sector != ''&F_OUT$Commodity_Name != ''&F_OUT$Commodity_Name != 'Water',names(F_OUT)%in% c('Sector','Commodity_Name','F_OUT')]
+flowout = flowout %>% group_by(Sector,Commodity_Name)%>%summarise(value = sum(F_OUT))
+flowout = droplevels(flowout)
+flowout$dir = 'out'
+
+allflows = rbind(flowin,flowout)
+allflows = droplevels(allflows)
+
+tmp1 = as.data.frame(unique(allflows[,1]));names(tmp1) = 'name'
+tmp2 = unique(allflows[,2]);names(tmp2) = 'name'
 
 mynodes = rbind(tmp1,tmp2)
 n = dim(mynodes)[1]
 mynodes$nameid = seq(0,n-1)
 mynodes$name = as.character(mynodes$name)
 
-flowin = merge(flowin,mynodes,by.x = 'Sector',by.y = 'name')
-names(flowin)[names(flowin) == 'nameid'] = 'target'
-flowin = merge(flowin,mynodes,by.x = 'Commodity_Name',by.y = 'name')
-names(flowin)[names(flowin) == 'nameid'] = 'source'
+allflows = merge(allflows,mynodes,by.x = 'Sector',by.y = 'name')
+names(allflows)[5] = 'sectorname'
 
-mylinks = flowin[,names(flowin)%in% c('source','target','value')]
+allflows2 = merge(allflows,mynodes,by.x = 'Commodity_Name',by.y = 'name')
+names(allflows2)[6] = 'comname'
+
+allflows3 = allflows2
+allflows3[allflows3$dir =='in','source'] = allflows3[allflows3$dir =='in','comname']
+allflows3[allflows3$dir == 'out','source'] = allflows3[allflows3$dir =='out','sectorname']
+allflows3[allflows3$dir =='in','target'] = allflows3[allflows3$dir =='in','sectorname']
+allflows3[allflows3$dir == 'out','target'] = allflows3[allflows3$dir =='out','comname']
+
+
+mylinks = allflows3[,names(allflows3)%in% c('source','target','value')]
 mynodes = as.data.frame(mynodes$name)
 names(mynodes) = 'name'
 mynodes$name = as.character(mynodes$name)#why the fuck does R turn the character into a fucking factor???
+
+
 
 
 sankeyNetwork(Links = mylinks, Nodes = mynodes, Source = "source",
