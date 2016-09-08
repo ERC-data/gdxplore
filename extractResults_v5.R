@@ -20,15 +20,18 @@ addCOMmap <- function(db){
   return(db)
 }
 
-getEmisResults = function(df,srch,myCase,sbstr = 1){
+getEmisResults = function(df,srch,dmd = 0,myCase,sbstr = 1){
   #gets the associated emissions results from emis_results using the 'srch' criteria for process name
   #sbstr is for either substringing the commodity name or not (0) - some commodities names dont need to be chopped up
   print(paste('extracting emissions results for ',substr(srch,2,5)))
   df = df[grepl(srch,df$Process),]
   if(sbstr){
     df$Commodity = substr(df$Commodity,4,8)}
-  
   keep  =c('Region','Year','Process','Commodity','F_OUT')
+  if(dmd){#need sector detail
+    keep = c('Region','Year','Process','Subsector','Subsubsector','Commodity','F_OUT')
+  }
+  
   df = df[,names(df)%in% keep]
   df$Case = myCase
   return(df)
@@ -523,8 +526,11 @@ processGDX <- function(gdxPath,gdxname){
     refs_flows[duplicated(paste(paste(refs_flows$VAR_ACT,refs_flows$Process),refs_flows$Year)),'VAR_ACT'] = 0# we get duplicate var_act for each F_IN commodity, make the duplicates 0 (except one of them)
     refs_flows = droplevels(refs_flows)
     
-    refs_costs = CST_INVC[CST_INVC$Sector =='Refineries',]
+    refs_costs = merge(CST_INVC,merge(CST_ACTC,CST_FIXC,all.x = T),all.x = T)
+    refs_costs = refs_costs[refs_costs$Sector =='Refineries',]
     refs_costs = refs_costs[,!(names(refs_costs)%in% c('Sector','Timeslice'))]
+    refs_costs[is.na(refs_costs)] = 0
+    refs_costs = refs_costs %>% mutate(Allcosts = CST_INVC+CST_ACTC+CST_FIXC)
     refs_costs$Case = myCase
     refs_costs = droplevels(refs_costs)
     
@@ -556,6 +562,7 @@ processGDX <- function(gdxPath,gdxname){
     ind_costs = merge(merge(CST_INVC,CST_FIXC,all.x = TRUE),CST_ACTC,all.x = TRUE)
     ind_costs = ind_costs[ind_costs$Sector =="Industry",!(names(ind_costs) %in% c('Sector','Timeslice'))]
     ind_costs[is.na(ind_costs)] = 0
+    ind_costs = ind_costs %>% mutate(Allcosts = CST_INVC+CST_ACTC+CST_FIXC)
     ind_costs$Case = myCase
     ind_costs = droplevels(ind_costs)
     
@@ -599,6 +606,7 @@ processGDX <- function(gdxPath,gdxname){
     com_costs = merge(merge(CST_INVC[CST_INVC$Sector =='Commerce',],CST_FIXC,all.x = TRUE),CST_ACTC,all.x = TRUE)
     com_costs = com_costs[,!(names(com_costs) %in%c('Sector','Timeslice'))]
     com_costs[is.na(com_costs)] = 0
+    com_costs = com_costs %>% mutate(Allcosts = CST_INVC+CST_FIXC+CST_ACTC)
     com_costs$Case = myCase
     com_costs = droplevels(com_costs)
     
@@ -615,18 +623,23 @@ processGDX <- function(gdxPath,gdxname){
       emis_results = F_OUT[grepl(emis_code,F_OUT$Commodity),]
       emis_results = merge(tmp,emis_results)
       
-      refs_emis = getEmisResults(emis_results,'^U',myCase)
-      pwr_emis = getEmisResults(emis_results,'^XPWR',myCase)
-      sup_emis = getEmisResults(emis_results,'^MIN',myCase,0) 
-      com_emis = getEmisResults(emis_results,'^XCOM',myCase)
-      res_emis = getEmisResults(emis_results,'^XRES',myCase)
-      tra_emis = getEmisResults(emis_results,'^XTRA',myCase)
-      ind_emis = getEmisResults(emis_results,'^XIND',myCase)
+      refs_emis = getEmisResults(emis_results,'^U',0,myCase)
+      pwr_emis = getEmisResults(emis_results,'^XPWR',0,myCase)
+      sup_emis = getEmisResults(emis_results,'^MIN',0,myCase) 
+      com_emis = getEmisResults(emis_results,'^XCOM',0,myCase)
+      res_emis = getEmisResults(emis_results,'^XRES',0,myCase)
+      tra_emis = getEmisResults(emis_results,'^XTRA',0,myCase)
+      ind_emis = getEmisResults(emis_results,'^XIND',0,myCase)
+      
+      keep = c('Process','Commodity','Region','Year','F_OUT','Case')
+      all_emis = getEmisResults(emis_results,'^',0,myCase,1)
+      all_emis$Process = substr(all_emis$Process,2,4)
+      names(all_emis)[2] = 'Sector'
       
   #Combine into list:
   masterlist = list(pwrdf,pwr_cap,pwr_ncap,pwr_flows,pwr_costs,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
                     resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
-                    refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis)
+                    refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis,all_emis)
   
   print('DONE PROCESSING!')
   return(masterlist)
