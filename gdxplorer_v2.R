@@ -6,7 +6,7 @@ library(shiny)
 #rdsfilepath = "http://energydata.uct.ac.za/dataset/1db4d94d-867e-4706-a26e-b4600fee594b/resource/395efb75-30ae-4df1-b080-b7b3aabdb4fa/download/processedtestprojname24aug2016.rds"
 
 #local:
-rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scens_processed_07Sep2016.rds'
+rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scens_processed_08Sep2016.rds'
 #'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/processed_TestProjname_24Aug2016.rds'
 
 tmplist = list()
@@ -15,7 +15,7 @@ pwr_cap = pwr_ncap = pwr_flows = pwr_costs = data.frame()
 
 tradf = tra_flows = tra_costs = tra_cap = tra_ncap = data.frame()
 refs_costs = refs_flows = refs_ncap = refs_cap = data.frame()
-pwr_emis = ind_emis = res_emis = com_emis = tra_emis = sup_emis= refs_emis= data.frame()
+pwr_emis = ind_emis = res_emis = com_emis = tra_emis = sup_emis= refs_emis= all_emis = data.frame()
 
 resdf = data.frame()
 res_flows = data.frame()
@@ -86,7 +86,8 @@ for (i in 1:n){
   tra_emis = rbind(tra_emis,as.data.frame(tmplist[[i]][30]))
   sup_emis = rbind(sup_emis,as.data.frame(tmplist[[i]][31]))
   refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
+  all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
 }
 
-runApp(paste(workdir,'/ShinyApp/',sep =''))
+#runApp(paste(workdir,'/ShinyApp/',sep =''))
 
