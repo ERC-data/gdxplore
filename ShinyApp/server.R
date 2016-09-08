@@ -92,28 +92,44 @@ shinyServer(function(input, output) {
     
   })
   
+  #RESIDENTIAL ==================================
   output$resfpivottable <- renderRpivotTable({
     rpivotTable(
       res_flows,
-      rows=myrowlist,
+      rows=c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals=deflt_vals,
+      vals='F_IN',
       rendererName = deflt_view
     )
   })
   output$rescpivottable <- renderRpivotTable({
     rpivotTable(
       res_cost,
-      rows=myrowlist,
+      rows= c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals=deflt_vals,
+      vals='Allcosts',
       rendererName = deflt_view
     )
   })
+  
+  output$resemispivottable <- renderRpivotTable({
+    rpivotTable(
+      res_emis,
+      rows=c('Commodity'),
+      col = mycollist,
+      aggregatorName='Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_OUT',
+      rendererName = 'Stacked Bar Chart'
+    )
+  })
+  
+  #   ============================
+  
   
   output$pwrpivottable <- renderRpivotTable({
     rpivotTable(
@@ -126,6 +142,8 @@ shinyServer(function(input, output) {
       rendererName = deflt_view
     )
   })
+  
+  #INDUSTRy ================================
   output$indpivottable <- renderRpivotTable({
     rpivotTable(
       inddf,
@@ -140,7 +158,7 @@ shinyServer(function(input, output) {
   output$indfpivottable <- renderRpivotTable({
     rpivotTable(
       ind_flows,
-      rows=c('Subsubsector','Commodity_Name'),
+      rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
@@ -155,10 +173,27 @@ shinyServer(function(input, output) {
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals= 'F_IN',
+      vals= 'Allcosts',
       rendererName = deflt_view
     )
   })
+  
+  output$indemispivottable <- renderRpivotTable({
+    rpivotTable(
+      ind_emis,
+      rows=c('Commodity'),
+      col = mycollist,
+      aggregatorName='Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_OUT',
+      rendererName = 'Stacked Bar Chart'
+    )
+  })
+  
+  #     ===================================
+  
+  
+  # TRANSPORT ===================================
   
   output$trapivottable <- renderRpivotTable({
     rpivotTable(
@@ -172,15 +207,16 @@ shinyServer(function(input, output) {
     )
     
   })
+  
   output$tracappivottable <- renderRpivotTable({
     rpivotTable(
       tra_cap,
-      rows=c('Subsector','Subsubsector','Commodity_Name'),
+      rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
       vals= 'Capacity',
-      rendererName = deflt_view
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
@@ -211,25 +247,40 @@ shinyServer(function(input, output) {
   output$trancappivottable <- renderRpivotTable({
     rpivotTable(
       tra_ncap,
-      rows=c('Subsector','Subsubsector','Commodity_Name'),
+      rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
       vals= 'NCAPL',
-      rendererName = deflt_view
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
   
+  output$traemispivottable <- renderRpivotTable({
+    rpivotTable(
+      tra_emis,
+      rows=c('Commodity'),
+      col = mycollist,
+      aggregatorName='Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_OUT',
+      rendererName = 'Stacked Bar Chart'
+    )
+  })
+  
+  
+  #REFINERIES =============================================
+  
   output$refcappivottable <- renderRpivotTable({
     rpivotTable(
       refs_cap,
-      rows=c('Subsector','Subsubsector','Commodity_Name'),
+      rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
       vals= 'Capacity',
-      rendererName = deflt_view
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
@@ -245,27 +296,28 @@ shinyServer(function(input, output) {
     )
     
   })
+  
   output$refcpivottable <- renderRpivotTable({
     rpivotTable(
       refs_costs,
-      rows=c('Subsector','Subsubsector','Commodity_Name'),
+      rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals= 'CST_INVC',
-      rendererName = deflt_view
+      vals= 'Allcosts',
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
   output$refncappivottable <- renderRpivotTable({
     rpivotTable(
       refs_ncap,
-      rows=c('Subsector','Subsubsector','Commodity_Name'),
+      rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
       vals= 'NCAPL',
-      rendererName = deflt_view
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
@@ -294,7 +346,7 @@ shinyServer(function(input, output) {
     )
     
   })
-  
+  # COMMERCE =========================================
   output$comfpivottable <- renderRpivotTable({
     rpivotTable(
       com_flows,
@@ -331,16 +383,30 @@ shinyServer(function(input, output) {
     )
     
   })
-  output$clprpivottable <- renderRpivotTable({
+  
+  output$comemispivottable <- renderRpivotTable({
     rpivotTable(
-      clpricesdf,
-      rows=c('Case'),
+      com_emis,
+      rows=c('Commodity'),
+      col = mycollist,
+      aggregatorName='Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_OUT',
+      rendererName = 'Stacked Bar Chart'
+    )
+  })
+  
+  output$allemispivottable <- renderRpivotTable({
+    rpivotTable(
+      all_emis,
+      rows=c('Sector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals= 'avgCLpriceAll',
-      rendererName = 'Line Chart'
+      vals= 'F_OUT',
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
+  
 })
