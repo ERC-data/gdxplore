@@ -20,6 +20,23 @@ addCOMmap <- function(db){
   return(db)
 }
 
+getEmisResults = function(df,srch,dmd = 0,myCase,sbstr = 1){
+  #gets the associated emissions results from emis_results using the 'srch' criteria for process name
+  #sbstr is for either substringing the commodity name or not (0) - some commodities names dont need to be chopped up
+  print(paste('extracting emissions results for ',substr(srch,2,5)))
+  df = df[grepl(srch,df$Process),]
+  if(sbstr){
+    df$Commodity = substr(df$Commodity,4,8)}
+  keep  =c('Region','Year','Process','Commodity','F_OUT')
+  if(dmd){#need sector detail
+    keep = c('Region','Year','Process','Subsector','Subsubsector','Commodity','F_OUT')
+  }
+  
+  df = df[,names(df)%in% keep]
+  df$Case = myCase
+  return(df)
+}
+
 processGDX <- function(gdxPath,gdxname){
   
   print(paste('Reading in parameters from GDX'))
@@ -136,8 +153,67 @@ processGDX <- function(gdxPath,gdxname){
     vardf = vardf[,!(names(vardf)%in% c('Vsector_sum'))]
     
   #ENERGY SHARES
-  fuels = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='Fuels')
- 
+  #fuels = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='Fuels')
+  
+  #GET processing sets from csv.
+    tmp = read.csv(paste(workdir,'processingsets.csv',sep =''))
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],1]) 
+    names(tmp2) = tmp[1,1]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    passengerModes =tmp2
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],2]) 
+    names(tmp2) = tmp[1,2]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    fuelpcpwr =tmp2
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],3]) 
+    names(tmp2) = tmp[1,3]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    fuelpcpwr_a =tmp2
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],4]) 
+    names(tmp2) = tmp[1,4]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    fuelpcpwr_cb = tmp2 
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],5]) 
+    names(tmp2) = tmp[1,5]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    freightModes = tmp2
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],6]) 
+    names(tmp2) = tmp[1,6]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    mincldual = tmp2 
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],7]) 
+    names(tmp2) = tmp[1,7]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    mincldual_a = tmp2
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],c(8,9)]) 
+    names(tmp2) =c(as.character(tmp[1,8]),as.character(tmp[1,9]))
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    mfuelpwr = tmp2 
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],10]) 
+    names(tmp2) = tmp[1,10]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    fuels = tmp2 
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],11]) 
+    names(tmp2) = 
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    Fuels2 =tmp2
+    
+    tmp2 = data.frame(tmp[2:dim(tmp)[1],12]) 
+    names(tmp2) = tmp[1,3]
+    tmp2= tmp2[tmp2[,1]!='',,drop = F]
+    minclpwr = tmp2
+    
+  
   #totalFinal = sum of all fuels over all sectors. one value for each year
     CINPL1F <- F_IN[F_IN$Sector != ''&F_IN$Commodity_Name != ''&F_IN$Commodity_Name %in% fuels$Fuels,]%>%
     group_by(Region,Year,Sector,Commodity_Name)%>%
@@ -187,9 +263,9 @@ processGDX <- function(gdxPath,gdxname){
   sim_fuelpx = rgdx.param(gdxPath,'SIM_FUELPX')#fuel price (input) for central basin
   names(sim_fuelpx) =c('Process','Year','FUELPX')
   
-  fuelpcpwr_cb = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='fuelpcpwr_cb')
-  fuelpcpwr_a =  readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='fuelpcpwr_a')
-  fuelpcpwr=  readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='fuelpcpwr')
+  #fuelpcpwr_cb = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='fuelpcpwr_cb')
+  #fuelpcpwr_a =  readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='fuelpcpwr_a')
+  #fuelpcpwr=  readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='fuelpcpwr')
   
   sim_FuelPcPwrCB = sim_fuelpx[sim_fuelpx$Process %in% fuelpcpwr_cb$Process,]
   sim_FuelPcPwrA = sim_fuelpx[sim_fuelpx$Process %in%fuelpcpwr_a$Process,]
@@ -236,7 +312,7 @@ processGDX <- function(gdxPath,gdxname){
   
   
   #dedicated mines
-  minclpwr =readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='minclpwr')
+  #minclpwr =readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='minclpwr')
   
   TCST_PWRCL = merge(CST_ACTC,merge(CST_FIXC,CST_INVC,all = TRUE),all = TRUE) 
   TCST_PWRCL = TCST_PWRCL[TCST_PWRCL$Process %in% minclpwr$Process,]
@@ -247,7 +323,7 @@ processGDX <- function(gdxPath,gdxname){
   
   
   #non dedicated mines
-  mincldual = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='mincledual')
+  #mincldual = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='mincledual')
   
   TCST_PWRDUAL =  merge(CST_ACTC,merge(CST_FIXC,CST_INVC,all = TRUE),all = TRUE) 
   TCST_PWRDUAL = merge(TCST_PWRDUAL,VARACT,all.x = TRUE)
@@ -263,7 +339,7 @@ processGDX <- function(gdxPath,gdxname){
     summarise(tcst_pwrdual = sum(tcst_pwrdual))
   
   #non dedicated mines waterberg
-  mincldual_a = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='mincldual_a')
+  #mincldual_a = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='mincldual_a')
   TCST_PWRDUAL_A =  merge(CST_ACTC,merge(CST_FIXC,CST_INVC,all = TRUE),all = TRUE) 
   TCST_PWRDUAL_A = merge(TCST_PWRDUAL_A,VARACT,all.x = TRUE)
   TCST_PWRDUAL_A = TCST_PWRDUAL_A[TCST_PWRDUAL_A$Process %in%  mincldual_a$Process,]
@@ -294,7 +370,7 @@ processGDX <- function(gdxPath,gdxname){
   TCST_PWRCL_T = TCST_PWRCL_T[,-3]
   
   #TCST_PWROTH
-  mfuelpwr = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='mfuelpwr')
+  #mfuelpwr = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='mfuelpwr')
   #take process activity from mfuelpwr and multiply with marginal in vcombalem that corresponds with that process
   TCST_PWROTH = merge(merge(mfuelpwr,VARACT),FuelCOMBAL)
   TCST_PWROTH = TCST_PWROTH %>% mutate(other_pwr_costs = VAR_ACT*fuelCombal)%>%
@@ -317,7 +393,7 @@ processGDX <- function(gdxPath,gdxname){
   print('calculating transport results')
   #passenger
   
-  passengerModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='PassengerModes')
+  #passengerModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='PassengerModes')
   passengerkm = rgdx.param(gdxPath,'Passengerkm')#get the passenger km
   names(passengerkm) = c('Commodity','Year','bpkm') 
   
@@ -344,7 +420,7 @@ processGDX <- function(gdxPath,gdxname){
   passengerkmAll = passengerkmAll[,!(names(passengerkmAll) %in% c('Sector','Timeslice'))]#drop redundant columns
   
   #FREIGHT
-  freightModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='FreightModes')
+  #freightModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='FreightModes')
   tonkm = rgdx.param(gdxPath,'Tonkm')
   
   names(tonkm) =c('Commodity','Year','btkm')
@@ -375,30 +451,30 @@ processGDX <- function(gdxPath,gdxname){
   
     #POWER SECTOR - total capacity
     print('...power')
-    pwr1 = CAP_T[CAP_T$Sector == 'Power',] 
-    pwr1$Case = myCase
-    pwr1 = pwr1[,!(names(pwr1)%in% c('Subsubsector'))]
-    pwr1 = droplevels(pwr1)
+    pwr_cap = CAP_T[CAP_T$Sector == 'Power',] 
+    pwr_cap$Case = myCase
+    pwr_cap = pwr_cap[,!(names(pwr_cap)%in% c('Subsubsector'))]
+    pwr_cap = droplevels(pwr_cap)
     
     #POWER SECTOR - NEW capacity
-    pwr2 = addPRCmap(NCAPL)
-    pwr2 = pwr2[pwr2$Sector == 'Power',]
-    pwr2$Case = myCase
-    pwr2 = droplevels(pwr2)
+    pwr_ncap = addPRCmap(NCAPL)
+    pwr_ncap = pwr_ncap[pwr_ncap$Sector == 'Power',]
+    pwr_ncap$Case = myCase
+    pwr_ncap = droplevels(pwr_ncap)
     
     #POWER SECTOR - flows
-    pwr3 = merge(vardf,F_IN,all.x = TRUE)
-    pwr3 = pwr3[pwr3$Sector =='Power',!(names(pwr3) %in% c('Timeslice'))] #drop timeslices
-    pwr3$Case = myCase
-    pwr3[is.na(pwr3)] = 0
-    pwr3 = droplevels(pwr3)
+    pwr_flows = merge(vardf,F_IN,all.x = TRUE)
+    pwr_flows = pwr_flows[pwr_flows$Sector =='Power',!(names(pwr_flows) %in% c('Timeslice'))] #drop timeslices
+    pwr_flows$Case = myCase
+    pwr_flows[is.na(pwr_flows)] = 0
+    pwr_flows = droplevels(pwr_flows)
     
     #POWER SECTOR - costs
-    pwr4 = merge(merge(CST_INVC,CST_ACTC),CST_FIXC)
-    pwr4 = pwr4[pwr4$Sector == 'Power',]
+    pwr_costs = merge(merge(CST_INVC,CST_ACTC),CST_FIXC)
+    pwr_costs = pwr_costs[pwr_costs$Sector == 'Power',]
     
-    pwr4$Case = myCase
-    pwr4 = droplevels(pwr4)
+    pwr_costs$Case = myCase
+    pwr_costs = droplevels(pwr_costs)
     
     tmp = merge(CAP_T,NCAPL,all = TRUE)#add capacity
     tmp = merge(tmp,CST_INVC,all.x = TRUE)#add investments
@@ -450,8 +526,11 @@ processGDX <- function(gdxPath,gdxname){
     refs_flows[duplicated(paste(paste(refs_flows$VAR_ACT,refs_flows$Process),refs_flows$Year)),'VAR_ACT'] = 0# we get duplicate var_act for each F_IN commodity, make the duplicates 0 (except one of them)
     refs_flows = droplevels(refs_flows)
     
-    refs_costs = CST_INVC[CST_INVC$Sector =='Refineries',]
+    refs_costs = merge(CST_INVC,merge(CST_ACTC,CST_FIXC,all.x = T),all.x = T)
+    refs_costs = refs_costs[refs_costs$Sector =='Refineries',]
     refs_costs = refs_costs[,!(names(refs_costs)%in% c('Sector','Timeslice'))]
+    refs_costs[is.na(refs_costs)] = 0
+    refs_costs = refs_costs %>% mutate(Allcosts = CST_INVC+CST_ACTC+CST_FIXC)
     refs_costs$Case = myCase
     refs_costs = droplevels(refs_costs)
     
@@ -483,6 +562,7 @@ processGDX <- function(gdxPath,gdxname){
     ind_costs = merge(merge(CST_INVC,CST_FIXC,all.x = TRUE),CST_ACTC,all.x = TRUE)
     ind_costs = ind_costs[ind_costs$Sector =="Industry",!(names(ind_costs) %in% c('Sector','Timeslice'))]
     ind_costs[is.na(ind_costs)] = 0
+    ind_costs = ind_costs %>% mutate(Allcosts = CST_INVC+CST_ACTC+CST_FIXC)
     ind_costs$Case = myCase
     ind_costs = droplevels(ind_costs)
     
@@ -526,6 +606,7 @@ processGDX <- function(gdxPath,gdxname){
     com_costs = merge(merge(CST_INVC[CST_INVC$Sector =='Commerce',],CST_FIXC,all.x = TRUE),CST_ACTC,all.x = TRUE)
     com_costs = com_costs[,!(names(com_costs) %in%c('Sector','Timeslice'))]
     com_costs[is.na(com_costs)] = 0
+    com_costs = com_costs %>% mutate(Allcosts = CST_INVC+CST_FIXC+CST_ACTC)
     com_costs$Case = myCase
     com_costs = droplevels(com_costs)
     
@@ -534,10 +615,31 @@ processGDX <- function(gdxPath,gdxname){
     VARACT$Case = myCase
     VARACT = droplevels(addPRCmap(VARACT))
     
+    #GETTING EMISSIONS
+      emis_code = c('CH4S','CMOX','CO2S','N2OS','NMVS','NOXS','SOXS','CO2EQS','CH4S')
+      emis_code = paste(emis_code,collapse = '|')
+      tmp = F_OUT[,!(names(F_OUT)%in% 'F_OUT')]
+      tmp[] = lapply(tmp,as.character) #have to do this because of annoying R factor reassigns
+      emis_results = F_OUT[grepl(emis_code,F_OUT$Commodity),]
+      emis_results = merge(tmp,emis_results)
+      
+      refs_emis = getEmisResults(emis_results,'^U',0,myCase)
+      pwr_emis = getEmisResults(emis_results,'^XPWR',0,myCase)
+      sup_emis = getEmisResults(emis_results,'^MIN',0,myCase) 
+      com_emis = getEmisResults(emis_results,'^XCOM',0,myCase)
+      res_emis = getEmisResults(emis_results,'^XRES',0,myCase)
+      tra_emis = getEmisResults(emis_results,'^XTRA',0,myCase)
+      ind_emis = getEmisResults(emis_results,'^XIND',0,myCase)
+      
+      keep = c('Process','Commodity','Region','Year','F_OUT','Case')
+      all_emis = getEmisResults(emis_results,'^',0,myCase,1)
+      all_emis$Process = substr(all_emis$Process,2,4)
+      names(all_emis)[2] = 'Sector'
+      
   #Combine into list:
-  masterlist = list(pwrdf,pwr1,pwr2,pwr3,pwr4,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
+  masterlist = list(pwrdf,pwr_cap,pwr_ncap,pwr_flows,pwr_costs,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
                     resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
-                    refs_flows,refs_costs,refs_cap,refs_ncap)
+                    refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis,all_emis)
   
   print('DONE PROCESSING!')
   return(masterlist)

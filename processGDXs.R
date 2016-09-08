@@ -8,7 +8,7 @@ library(dplyr)
 library(rpivotTable)
 library(data.table)
 library(shiny)
-library(XLConnect)
+#library(XLConnect) no longer need this hopefully
 
 #set filepaths
 #load existing processed dataset (no need to process anything)
