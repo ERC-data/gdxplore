@@ -11,7 +11,7 @@ rdsfilepath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/student_3scen
 
 tmplist = list()
 pwrdf = data.frame()
-pwr1 = pwr2 = pwr3 = pwr4 = data.frame()
+pwr_cap = pwr_ncap = pwr_flows = pwr_costs = data.frame()
 
 tradf = tra_flows = tra_costs = tra_cap = tra_ncap = data.frame()
 refs_costs = refs_flows = refs_ncap = refs_cap = data.frame()
@@ -45,10 +45,10 @@ n = length(tmplist)
 for (i in 1:n){
   print(i)
   pwrdf = rbind(pwrdf,as.data.frame(tmplist[[i]][1]))
-  pwr1 = rbind(pwr1,as.data.frame(tmplist[[i]][2]))
-  pwr2 = rbind(pwr2,as.data.frame(tmplist[[i]][3]))
-  pwr3 = rbind(pwr3,as.data.frame(tmplist[[i]][4]))
-  pwr4 = rbind(pwr4,as.data.frame(tmplist[[i]][5]))
+  pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
+  pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
+  pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
+  pwr_costs = rbind(pwr_costs,as.data.frame(tmplist[[i]][5]))
   
   tradf = rbind(tradf,as.data.frame(tmplist[[i]][6]))
   tra_flows = rbind(tra_flows,as.data.frame(tmplist[[i]][18]))

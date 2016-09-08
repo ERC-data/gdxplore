@@ -7,59 +7,59 @@ mycollist = c('Year')
 deflt_aggr = 'Sum'
 deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
-myinclusion = '01REF' #NOTE This will have to be automatic
+tmp = paste(gdxlist[1])
+myinclusion = strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
- 
-  #prcgdxfilepath <- input$prcgdxfilepath
-  #prcgdxfilepath <- prcgdxfilepath$datapath#get the path
-  output$pwr1pivottable <- renderRpivotTable({
+  
+  #POWER TABS ============================================
+  output$pwr_cappivottable <- renderRpivotTable({
     rpivotTable(
-      pwr1,
+      pwr_cap,
+      rows= 'Subsector',
+      col = mycollist,
+      aggregatorName= 'Sum',
+      inclusions = list(Case = list(myinclusion)),
+      vals= 'Capacity',
+      rendererName = 'Stacked Bar Chart'
+    )
+    
+  })
+  output$pwr_ncappivottable <- renderRpivotTable({
+    rpivotTable(
+      pwr_ncap,
       rows=myrowlist,
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals=deflt_vals,
+      vals= 'NCAPL',
+      rendererName = 'Stacked Bar Chart'
+    )
+    
+  })
+  output$pwr_flowspivottable <- renderRpivotTable({
+    rpivotTable(
+      pwr_flows,
+      rows=c('Subsector','Subsubsector','Commodity_Name'),
+      col = mycollist,
+      aggregatorName=deflt_aggr,
+      inclusions = list(Case = list(myinclusion)),
+      vals='F_IN',
       rendererName = deflt_view
     )
     
   })
-  output$pwr2pivottable <- renderRpivotTable({
+  output$pwr_costspivottable <- renderRpivotTable({
     rpivotTable(
-      pwr2,
-      rows=myrowlist,
+      pwr_costs,
+      rows=c('Subsector','Subsubsector'),
       col = mycollist,
-      aggregatorName=deflt_aggr,
+      aggregatorName= 'Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals=deflt_vals,
-      rendererName = deflt_view
-    )
-    
-  })
-  output$pwr3pivottable <- renderRpivotTable({
-    rpivotTable(
-      pwr3,
-      rows=myrowlist,
-      col = mycollist,
-      aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
-      vals=deflt_vals,
-      rendererName = deflt_view
-    )
-    
-  })
-  output$pwr4pivottable <- renderRpivotTable({
-    rpivotTable(
-      pwr4,
-      rows=myrowlist,
-      col = mycollist,
-      aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
-      vals=deflt_vals,
-      rendererName = deflt_view
+      vals='CST_INVC',
+      rendererName = 'Stacked Bar Chart'
     )
     
   })
@@ -76,6 +76,8 @@ shinyServer(function(input, output) {
     )
     
   })
+  
+  #========================================================
   
   output$refemispivottable <- renderRpivotTable({
     rpivotTable(

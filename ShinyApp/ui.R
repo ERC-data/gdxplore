@@ -2,10 +2,10 @@ library(shiny)
 library(rpivotTable)
 
 shinyUI(navbarPage("GDXplorer",tabPanel('Power',
-                                        tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('pwr1pivottable')),
-                                                    tabPanel('New Capacity',rpivotTableOutput('pwr2pivottable')),
-                                                    tabPanel('Flows',rpivotTableOutput('pwr3pivottable')),
-                                                    tabPanel('Costs',rpivotTableOutput('pwr4pivottable')),
+                                        tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('pwr_cappivottable')),
+                                                    tabPanel('New Capacity',rpivotTableOutput('pwr_ncappivottable')),
+                                                    tabPanel('Flows',rpivotTableOutput('pwr_flowspivottable')),
+                                                    tabPanel('Costs',rpivotTableOutput('pwr_costspivottable')),
                                                     tabPanel("Emissions",rpivotTableOutput('pwremispivottable')))),
         tabPanel("Residential",
                  tabsetPanel(tabPanel('Flows',rpivotTableOutput('resfpivottable')),
