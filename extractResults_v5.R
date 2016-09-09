@@ -397,7 +397,7 @@ processGDX <- function(gdxPath,gdxname){
   passengerkm = rgdx.param(gdxPath,'Passengerkm')#get the passenger km
   names(passengerkm) = c('Commodity','Year','bpkm') 
   
-  #simDEMX_pass = simDEMX[simDEMX$Commodity %in% passengerModes,]
+  simDEMX_pass = simDEMX[simDEMX$Commodity %in% passengerModes$Commodity,]
   
   passengerOccupancy = merge(passengerkm,simDEMX[simDEMX$Commodity %in% passengerModes$Commodity,])
   names(passengerOccupancy)[4] = 'bvkm'
@@ -466,7 +466,7 @@ processGDX <- function(gdxPath,gdxname){
     pwr_flows = merge(vardf,F_IN,all.x = TRUE)
     pwr_flows = pwr_flows[pwr_flows$Sector =='Power',!(names(pwr_flows) %in% c('Timeslice'))] #drop timeslices
     pwr_flows$Case = myCase
-    pwr_flows[is.na(pwr_flows)] = 0
+    pwr_flows[is.na(pwr_flows$F_IN),'F_IN'] = 0
     pwr_flows = droplevels(pwr_flows)
     
     #POWER SECTOR - costs
@@ -487,9 +487,7 @@ processGDX <- function(gdxPath,gdxname){
     #TRANSPORT
     print('...transport')
     tmp = merge(tonkmAll,passengerkmAll,all = TRUE)
-    #tmp = merge(tmp,F_IN,all.x = TRUE)
     tmp$Case = myCase
-    #tmp = tmp[,-8]#Remove 'Timeslices' column which only has annual
     tmp = tmp[!(names(tmp) == 'Sector'),] #drop sector column - dont need
     tradf = droplevels(tmp)
     
@@ -641,6 +639,6 @@ processGDX <- function(gdxPath,gdxname){
                     resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
                     refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis,all_emis)
   
-  print('DONE PROCESSING!')
+  print('....DONE PROCESSING RESULTS!....')
   return(masterlist)
 }
