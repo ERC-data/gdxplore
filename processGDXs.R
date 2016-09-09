@@ -1,43 +1,30 @@
-#Bryce McCall
-#Aug 2016
-#this file will process multiple GDX files into one data list and save it 
+#RUN results extraction on all GDX's in the gdxlocation
+#SAVE results as rds file
 
 library(reshape2)
-library(gdxrrw) 
+library(gdxrrw)
 library(dplyr)
 library(rpivotTable)
 library(data.table)
 library(shiny)
-#library(XLConnect) no longer need this hopefully
 
-#set filepaths
-#load existing processed dataset (no need to process anything)
-# query if user wants to add anotehr gdx? 
-#   Y - prompt user for files (fileselection) then:
-#     run processing on this file + append to existing then:
-# run GDXplorer shiny
-
-projname = "student_3scens"
+projname = "scenarios"
 
 # location of your GAMS main directory. 
 GAMS_lib_dir = 'C:/GAMS/win64/24.7' 
 
 #main working directory for this file/script and colourcoding files etc. 
-workdir = 'C:/Users/01425453/Documents/R/gdxplore/'
+workdir = 'C:/EMOD/Rfiles/'
 
 #the GDX files location
-gdxLocation = 'C:/Users/01425453/Desktop/Student R layout/GDXfiles/'
-saverdspath = 'C:/Users/01425453/Desktop/Student R layout/RDSfiles/'
-
-#'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/Transport/'
-#'C:/AnswerTIMESv6/Gams_WrkTI-MC/Gamssave/'#'C:/Users/01425453/Desktop/SATM_TR_results/'#
+gdxLocation = 'C:/EMOD/GDXout/'
+saverdspath = 'C:/EMOD/RDSfiles/'
 
 # connect to the GAMS library.
 igdx(GAMS_lib_dir) 
 
 #LOAD FUNCTIONS
 source(paste(workdir,'extractResults_v5.R',sep =''))
-
 
 setwd(gdxLocation)
 gdxlist=list.files(pattern=".gdx")#get list of all gdx's in the location
