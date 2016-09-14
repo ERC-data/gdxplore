@@ -2,7 +2,6 @@
 #create all dataframes for the pivot tables
 #RUN the shiny viewer
 
-library(shiny)
 
 #get first processed rds file 
 thispath = 'C:/EMOD/Rfiles/'
@@ -37,7 +36,7 @@ varactdf = data.frame()
 
 #local 
 tmplist = readRDS(rdsfilepath)
-
+print(paste('Accessing ',rdsfilepath,sep='',collapse = ''))
 print('Loading dataframes for pivot tables...')
 #now have a list of lists - one list for each gdx
 #now need to take each df out of each gdx list and append to masterdf's for each subsector
@@ -86,6 +85,8 @@ for (i in 1:n){
   refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
   all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
 }
+
+save.image(file = 'savedRenv.RData')
 print('...Dataframes loaded')
-shiny::runApp(paste(thispath,'ShinyApp/',sep =''),launch.browser = TRUE)
+#shiny::runApp(paste(thispath,'ShinyApp/',sep =''))
 
