@@ -7,7 +7,7 @@ mycollist = c('Year')
 deflt_aggr = 'Sum'
 deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
-tmp = paste(gdxlist[1])
+tmp = names(tmplist[1])
 myinclusion = strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
 
 # Define server logic required to draw a histogram
