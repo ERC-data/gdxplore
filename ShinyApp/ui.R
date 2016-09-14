@@ -1,5 +1,6 @@
 library(shiny)
 library(rpivotTable)
+attach('C:/EMOD/RDSfiles/savedRenv.RData')
 
 shinyUI(navbarPage("GDXplorer",tabPanel('Power',
                                         tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('pwr_cappivottable')),
