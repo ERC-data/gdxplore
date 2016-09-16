@@ -32,8 +32,8 @@ shinyUI(navbarPage("GDXplorer",tabPanel('Power',
                  tabsetPanel(tabPanel('Flows',rpivotTableOutput('comfpivottable')),
                              tabPanel('Costs',rpivotTableOutput('comcpivottable')),
                              tabPanel("Emissions",rpivotTableOutput('comemispivottable')))),
-        tabPanel('Emissions',rpivotTableOutput('allemispivottable')),
-        tabPanel('Coal Prices',rpivotTableOutput('clprpivottable'))
+        tabPanel('Emissions',rpivotTableOutput('allemispivottable'))
+        
       )#navbarpage
       
 )#main panel
