@@ -23,6 +23,7 @@ saverdspath = 'C:/EMOD/RDSfiles/'
 # connect to the GAMS library.
 igdx(GAMS_lib_dir) 
 
+
 #LOAD FUNCTIONS
 source(paste(workdir,'extractResults_v5.R',sep =''))
 
