@@ -5,11 +5,11 @@
 
 #get first processed rds file 
 thispath = 'C:/EMOD/Rfiles/'
-saverdspath = 'C:/EMOD/RDSfiles/'
-setwd(saverdspath)
+rdspath = 'C:/EMOD/RDSfiles/'
+setwd(rdspath)
 
-rdslist=list.files(pattern=".rds")
-rdsfilepath = paste('C:/EMOD/RDSfiles',rdslist[1],sep = '/')
+rdslist=list.files(pattern=".rds") #get the list of files in this location
+rdsfilepath = paste(rdspath,rdslist[1],sep = '/')
 
 tmplist = list()
 pwrdf = data.frame()
@@ -88,5 +88,3 @@ for (i in 1:n){
 
 save.image(file = 'savedRenv.RData')
 print('...Dataframes loaded')
-#shiny::runApp(paste(thispath,'ShinyApp/',sep =''))
-
