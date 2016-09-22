@@ -443,7 +443,10 @@ processGDX <- function(gdxPath,gdxname){
   tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector'))]#drop the timeslice column
   
   
-  
+  #SUM OVER TIMESLICES TO AGGREGATE FOR THE YEAR
+  F_INa <- F_IN %>% group_by(Region,Year,Process,Sector,Subsector,Subsubsector,Commodity,Commodity_Name)%>%
+    summarise(F_IN = sum(F_IN))
+  F_IN = F_INa
   
   #-----------------------------------
   #Combine relavant dataframes and lists
