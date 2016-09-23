@@ -3,13 +3,17 @@
 #RUN the shiny viewer
 
 
+
 #get first processed rds file 
 thispath = 'C:/EMOD/Rfiles/'
 rdspath = 'C:/EMOD/RDSfiles/'
 setwd(rdspath)
 
-rdslist=list.files(pattern=".rds") #get the list of files in this location
-rdsfilepath = paste(rdspath,rdslist[1],sep = '/')
+details = file.info(list.files(pattern="*.rds"))
+details = details[with(details, order(as.POSIXct(mtime))), ]
+rdsfilename = rownames(details)[dim(details)[1]] #get the most recent modified rds file to process
+
+rdsfilepath = paste(rdspath,rdsfilename,sep = '/')
 
 tmplist = list()
 pwrdf = data.frame()
