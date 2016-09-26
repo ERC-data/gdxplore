@@ -20,21 +20,25 @@ addCOMmap <- function(db){
   return(db)
 }
 
-getEmisResults = function(df,srch,dmd = 0,myCase,sbstr = 1){
-  #gets the associated emissions results from emis_results using the 'srch' criteria for process name
-  #sbstr is for either substringing the commodity name or not (0) - some commodities names dont need to be chopped up
-  print(paste('extracting emissions results for ',substr(srch,2,5)))
-  df = df[grepl(srch,df$Process),]
-  if(sbstr){
-    df$Commodity = substr(df$Commodity,4,8)}
-  keep  =c('Region','Year','Process','Commodity','F_OUT')
-  if(dmd){#need sector detail
-    keep = c('Region','Year','Process','Subsector','Subsubsector','Commodity','F_OUT')
+
+addEmisSource = function(mychar){
+  y = mychar
+  x = substr(y,5,7)
+  return(x)
+}
+addEmisNames = function(comin){
+  emis_types = c('CH4S','CMOX','CO2S','N2OS','NMVS','NOXS','SOXS','CO2EQS','CH4S')
+  n = length(emis_types)
+  for (i in seq(1,n)){
+    myemis = emis_types[i]
+    if(grepl(myemis,comin)){
+      emisname = myemis
+    }
+    
+    
   }
+  return(emisname)
   
-  df = df[,names(df)%in% keep]
-  df$Case = myCase
-  return(df)
 }
 
 processGDX <- function(gdxPath,gdxname){
@@ -616,31 +620,63 @@ processGDX <- function(gdxPath,gdxname){
     VARACT$Case = myCase
     VARACT = droplevels(addPRCmap(VARACT))
     
-    #GETTING EMISSIONS
-      emis_code = c('CH4S','CMOX','CO2S','N2OS','NMVS','NOXS','SOXS','CO2EQS','CH4S')
-      emis_code = paste(emis_code,collapse = '|')
-      tmp = F_OUT[,!(names(F_OUT)%in% 'F_OUT')]
-      tmp[] = lapply(tmp,as.character) #have to do this because of annoying R factor reassigns
-      emis_results = F_OUT[grepl(emis_code,F_OUT$Commodity),]
-      emis_results = merge(tmp,emis_results)
+    # GET SECTOR EMISSIONS BY FULL SECTOR DETAILS
       
-      refs_emis = getEmisResults(emis_results,'^U',0,myCase)
-      pwr_emis = getEmisResults(emis_results,'^XPWR',0,myCase)
-      sup_emis = getEmisResults(emis_results,'^MIN',0,myCase) 
-      com_emis = getEmisResults(emis_results,'^XCOM',0,myCase)
-      res_emis = getEmisResults(emis_results,'^XRES',0,myCase)
-      tra_emis = getEmisResults(emis_results,'^XTRA',0,myCase)
-      ind_emis = getEmisResults(emis_results,'^XIND',0,myCase)
+      # get emissions factors for each process/commodity
       
-      keep = c('Process','Commodity','Region','Year','F_OUT','Case')
-      all_emis = getEmisResults(emis_results,'^',0,myCase,1)
-      all_emis$Process = substr(all_emis$Process,2,4)
-      names(all_emis)[2] = 'Sector'
+      #things we want to include/exclude:
+      myEmisTypes = c('CH4S','CMOX','CO2S','N2OS','NMVS','NOXS','SOXS','CO2EQS','CH4S')
+      myEmisTypes_code = paste(myEmisTypes,collapse = '|')
+      mycols = c('Sector','Subsector','Subsubsector','Commodity_Name')
+      myexclusions = paste('^',paste(c('UXLE','PEX','X'),collapse = '|'),sep = '') #These are transfers from coal basins, exports, and transmissions
+      
+      #Alternate attempt (simpler)
+      emissionsFactors = read.csv(paste(workdir,'emissionsFactors.csv',sep ='/'))#get emissions factors
+      
+      
+      #get total flow in to each sector+subsector for each commodity
+      
+      Emissions_flows = F_IN[!(grepl('ELC',F_IN$Process))&!(grepl(myexclusions,F_IN$Process)),]# get all flow in's except electricity and exports
+      Emissions_flows = merge(Emissions_flows,emissionsFactors)#add emissions factors column from csv
+      Emissions_flows = Emissions_flows %>% mutate(GHG_kt = ktPJ*F_IN)#calculate ghg kt 
+      Emissions_flows = Emissions_flows %>% group_by(Region,Process,Year,Sector,Subsector,Subsubsector,Commodity_Name,
+                                                     Emissions) %>% summarise(GHG_kt = sum(GHG_kt))#sum over timeslices
+      Emissions_flows = ungroup(Emissions_flows)
+      Emissions_flows = droplevels(Emissions_flows)
+      Emissions_flows$Emissions = sapply(Emissions_flows$Emissions,addEmisNames) #add emissions names, some of them are xyzCH4 etc.
+      
+      #some have processt emissions (catch these on the flow_out) - no need to convert from PJ 
+      Emissions_flows_prc = F_OUT[(grepl(myEmisTypes_code,F_OUT$Commodity))&!(grepl('^X',F_OUT$Process)),!(names(F_OUT) %in% mycols)] #get all not X processes that DO have myEmisTypes
+      names(Emissions_flows_prc)[names(Emissions_flows_prc) == 'F_OUT'] = 'GHG_kt' #change name of FOUT to kt
+      names(Emissions_flows_prc)[names(Emissions_flows_prc) == 'Commodity'] = 'Emissions' # change name of commodity to Emission
+      Emissions_flows_prc = addPRCmap(Emissions_flows_prc)
+      Emissions_flows_prc = Emissions_flows_prc %>% group_by(Region,Process,Year,Sector,Subsector,Subsubsector,
+                                                             Emissions)%>%summarise(GHG_kt = mean(GHG_kt))# sum over timeslices
+      Emissions_flows_prc$Commodity_Name = 'Process'
+      Emissions_flows_prc$Emissions = paste(Emissions_flows_prc$Emissions,'_prc',sep = '')#add a suffix to denote process emissions
+      Emissions_flows_prc = ungroup(Emissions_flows_prc)
+      Emissions_flows_prc$Emissions= sapply(Emissions_flows_prc$Emissions,addEmisNames)
+      Emissions_flows_prc = droplevels(Emissions_flows_prc)
+      
+      #COmbine the Emissions and process emissions together
+      
+      All_emissions = rbind(Emissions_flows,Emissions_flows_prc)
+      names(All_emissions)[names(All_emissions)=='Commodity_Name'] = 'Emissions_source'
+      
+    #subselect sectors:
+      com_emis = All_emissions[All_emissions$Sector == 'Commercial',]
+      refs_emis = All_emissions[All_emissions$Sector == 'Refineries',]
+      pwr_emis = All_emissions[All_emissions$Sector == 'Power',]
+      res_emis = All_emissions[All_emissions$Sector == 'Residential',]
+      tra_emis= All_emissions[All_emissions$Sector == 'Transport',]
+      ind_emis = All_emissions[All_emissions$Sector == 'Industry',]
+      
+      sup_emis = All_emissions[All_emissions$Sector == 'Supply',]
       
   #Combine into list:
   masterlist = list(pwrdf,pwr_cap,pwr_ncap,pwr_flows,pwr_costs,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
                     resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
-                    refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis,all_emis)
+                    refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis,All_emissions)
   
   print('....DONE PROCESSING RESULTS!....')
   return(masterlist)
