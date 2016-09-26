@@ -25,9 +25,11 @@ igdx(GAMS_lib_dir)
 
 
 #LOAD FUNCTIONS
-source(paste(workdir,'extractResults_v5.R',sep =''))
+
+source(paste(workdir,'extractResults_v5.R',sep ='/'),local = FALSE)
 
 setwd(gdxLocation)
+
 gdxlist=list.files(pattern=".gdx")#get list of all gdx's in the location
 
 #go over each gdx name on the list, and compute the gdx summaries for each, appending to a main list
