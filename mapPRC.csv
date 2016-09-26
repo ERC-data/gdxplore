@@ -229,10 +229,10 @@ COM_ACHILLER-E,Commerce,ComExisting,Cooling
 COM_ACHILLER-N,Commerce,ComNew,Cooling
 COM_HEATER-E,Commerce,ComExisting,Space Heating
 COM_HEATER-N,Commerce,ComNew,Space Heating
-COMTHRM_SWITCH-E,Commerce,ComExisting,Other
-COMTHRM_SWITCH-N,Commerce,ComNew,Other
-COMTRI_1-E,,,Other
-COMTRI_1-N,,,Other
+COMTHRM_SWITCH-E,Commerce,ComExisting,AutoGen
+COMTHRM_SWITCH-N,Commerce,ComNew,AutoGen
+COMTRI_1-E,Commerce,ComExisting,AutoGen
+COMTRI_1-N,Commerce,ComNew,AutoGen
 IPPCHE-E,Industry,Pulp_Paper323,Other
 IPPCHE-E-T1,Industry,Pulp_Paper323,Other
 IPPCHE-E-T2,Industry,Pulp_Paper323,Other
@@ -770,9 +770,9 @@ PEXCME,Supply,Exports,Exports
 UCTLCLEIN-N-A,Refineries,CTL,CTL
 UXCWCME,,,Other
 UXCWCOA,,,Other
-UXLE2-AB,,,Other
-UXLE-AB,,,Other
-UXLE-BR,,,Other
+UXLE2-AB,Supply,Extraction,RailTransfer2
+UXLE2-AB,Supply,Extraction,RailTransfer
+UXLE-BR,Supply,Extraction,CB_RBCT
 XPWRCLE-A,,,Other
 XPWRCLEC,,,Other
 XPWRCLEC-A,,,Other
