@@ -119,10 +119,6 @@ processGDX <- function(gdxPath,gdxname){
   simDEMX = rgdx.param(gdxPath,'SIM_DEMX')# demand extracted from excel
   names(simDEMX) = c('Commodity','Year','Demand')
   
-  print('...done reading in parameters')
-  
-  #--------------------------------------------------------------
-  print('...Refining the parameters and process results')
   
   #add mapping 
   F_IN = addPRCmap(F_IN)
@@ -140,6 +136,14 @@ processGDX <- function(gdxPath,gdxname){
   CST_INVC = addPRCmap(CST_INVC)
   CST_FIXC = addPRCmap(CST_FIXC)
   CST_ACTC = addPRCmap(CST_ACTC)
+  
+  print('...done reading in parameters')
+  
+  #--------------------------------------------------------------
+  
+  print('...Refining the parameters and process results')
+  
+  
   #Total capacity = RESID + CAPL
   CAP_T = merge(CAPL,RESID,all = TRUE) 
   CAP_T[is.na(CAP_T)] = 0
@@ -389,13 +393,19 @@ processGDX <- function(gdxPath,gdxname){
   ERPRICE = ERPRICE%>% mutate(t_pwrcost = (3.6/1000)*(tcst_pwrcl_t+tcst_ele+other_pwr_costs))%>%
     group_by(Region,Year,t_pwrcost)%>%
     summarise(t_pwract = sum(VAR_ACT))%>%
-    mutate(ele_price = t_pwrcost/t_pwract)
+    mutate(Elec_price_RpkWh = t_pwrcost/t_pwract)
   ERPRICE = ERPRICE[,c(1,2,5)]
-  
+  ERPRICE$Case = myCase
   
   #TRANSPORT PROCESSING
+  
   print('calculating transport results')
   #passenger
+  
+  #SUM OVER TIMESLICES TO AGGREGATE FOR THE YEAR
+  F_IN <- F_IN %>% group_by(Region,Year,Process,Sector,Subsector,Subsubsector,Commodity,Commodity_Name)%>%
+    summarise(F_IN = sum(F_IN))
+  
   
   #passengerModes = readWorksheetFromFile(paste(workdir,'ProcessingSets.xlsx',sep =''), sheet ='PassengerModes')
   passengerkm = rgdx.param(gdxPath,'Passengerkm')#get the passenger km
@@ -447,10 +457,6 @@ processGDX <- function(gdxPath,gdxname){
   tonkmAll = tonkmAll[,!(names(tonkmAll) %in% c('Timeslice','Sector'))]#drop the timeslice column
   
   
-  #SUM OVER TIMESLICES TO AGGREGATE FOR THE YEAR
-  F_INa <- F_IN %>% group_by(Region,Year,Process,Sector,Subsector,Subsubsector,Commodity,Commodity_Name)%>%
-    summarise(F_IN = sum(F_IN))
-  F_IN = F_INa
   
   #-----------------------------------
   #Combine relavant dataframes and lists
@@ -674,7 +680,7 @@ processGDX <- function(gdxPath,gdxname){
       sup_emis = All_emissions[All_emissions$Sector == 'Supply',]
       
   #Combine into list:
-  masterlist = list(pwrdf,pwr_cap,pwr_ncap,pwr_flows,pwr_costs,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
+  masterlist = list(ERPRICE,pwr_cap,pwr_ncap,pwr_flows,pwr_costs,tradf,coalPrices,VARACT,inddf,ind_flows,ind_costs,
                     resdf,res_flows,res_cost,comdf,com_costs,com_flows,tra_flows,tra_costs,tra_cap,tra_ncap,
                     refs_flows,refs_costs,refs_cap,refs_ncap,pwr_emis,ind_emis,res_emis,com_emis,tra_emis,sup_emis,refs_emis,All_emissions)
   
