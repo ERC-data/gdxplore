@@ -634,7 +634,7 @@ processGDX <- function(gdxPath,gdxname){
       myEmisTypes = c('CH4S','CMOX','CO2S','N2OS','NMVS','NOXS','SOXS','CO2EQS','CH4S')
       myEmisTypes_code = paste(myEmisTypes,collapse = '|')
       mycols = c('Sector','Subsector','Subsubsector','Commodity_Name')
-      myexclusions = paste('^',paste(c('UXLE','PEX','X'),collapse = '|'),sep = '') #These are transfers from coal basins, exports, and transmissions
+      myexclusions = paste('^',paste(c('U','PEX','X'),collapse = '|'),sep = '') #exclude refineries, transmissions, and exports
       
       #Alternate attempt (simpler)
       emissionsFactors = read.csv(paste(workdir,'emissionsFactors.csv',sep ='/'))#get emissions factors
@@ -647,6 +647,7 @@ processGDX <- function(gdxPath,gdxname){
       Emissions_flows = Emissions_flows %>% mutate(GHG_kt = ktPJ*F_IN)#calculate ghg kt 
       Emissions_flows = Emissions_flows %>% group_by(Region,Process,Year,Sector,Subsector,Subsubsector,Commodity_Name,
                                                      Emissions) %>% summarise(GHG_kt = sum(GHG_kt))#sum over timeslices
+      names(Emissions_flows)[names(Emissions_flows) =='Commodity_Name'] = 'Emissions_source'
       Emissions_flows = ungroup(Emissions_flows)
       Emissions_flows = droplevels(Emissions_flows)
       Emissions_flows$Emissions = sapply(Emissions_flows$Emissions,addEmisNames) #add emissions names, some of them are xyzCH4 etc.
@@ -657,8 +658,8 @@ processGDX <- function(gdxPath,gdxname){
       names(Emissions_flows_prc)[names(Emissions_flows_prc) == 'Commodity'] = 'Emissions' # change name of commodity to Emission
       Emissions_flows_prc = addPRCmap(Emissions_flows_prc)
       Emissions_flows_prc = Emissions_flows_prc %>% group_by(Region,Process,Year,Sector,Subsector,Subsubsector,
-                                                             Emissions)%>%summarise(GHG_kt = mean(GHG_kt))# sum over timeslices
-      Emissions_flows_prc$Commodity_Name = 'Process'
+                                                             Emissions)%>%summarise(GHG_kt = sum(GHG_kt))# sum over timeslices
+      Emissions_flows_prc$Emissions_source = 'Process'
       Emissions_flows_prc$Emissions = paste(Emissions_flows_prc$Emissions,'_prc',sep = '')#add a suffix to denote process emissions
       Emissions_flows_prc = ungroup(Emissions_flows_prc)
       Emissions_flows_prc$Emissions= sapply(Emissions_flows_prc$Emissions,addEmisNames)
@@ -667,10 +668,10 @@ processGDX <- function(gdxPath,gdxname){
       #COmbine the Emissions and process emissions together
       
       All_emissions = rbind(Emissions_flows,Emissions_flows_prc)
-      names(All_emissions)[names(All_emissions)=='Commodity_Name'] = 'Emissions_source'
+      All_emissions$Case = myCase
       
     #subselect sectors:
-      com_emis = All_emissions[All_emissions$Sector == 'Commercial',]
+      com_emis = All_emissions[All_emissions$Sector == 'Commerce',]
       refs_emis = All_emissions[All_emissions$Sector == 'Refineries',]
       pwr_emis = All_emissions[All_emissions$Sector == 'Power',]
       res_emis = All_emissions[All_emissions$Sector == 'Residential',]
