@@ -17,7 +17,7 @@ rdsfilepath = paste(rdspath,rdsfilename,sep = '/')
 
 tmplist = list()
 pwrdf = data.frame()
-pwr_cap = pwr_ncap = pwr_flows = pwr_costs = data.frame()
+pwr_cap = pwr_ncap = pwr_flows = pwr_costs = pwr_indicators =EB = data.frame()
 
 tradf = tra_flows = tra_costs = tra_cap = tra_ncap = data.frame()
 refs_costs = refs_flows = refs_ncap = refs_cap = data.frame()
@@ -47,7 +47,7 @@ print('Loading dataframes for pivot tables...')
 n = length(tmplist)
 for (i in 1:n){
   print(i)
-  pwrdf = rbind(pwrdf,as.data.frame(tmplist[[i]][1]))
+  
   pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
   pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
   pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
@@ -88,6 +88,8 @@ for (i in 1:n){
   sup_emis = rbind(sup_emis,as.data.frame(tmplist[[i]][31]))
   refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
   all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
+  pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
+  EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
 }
 
 save.image(file = 'savedRenv.RData')
