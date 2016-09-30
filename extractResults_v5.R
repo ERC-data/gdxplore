@@ -709,6 +709,7 @@ processGDX <- function(gdxPath,gdxname){
   EB[is.na(EB)] = 0
   
   #EB = EB[EB$Sector != '',]
+  EB$Case = myCase
   EB = droplevels(EB[EB$Commodity_Name != '',])
   
   pwr_indicators = merge(CAP_T[CAP_T$Process == 'ETRANS',],F_OUTa,all.x = TRUE)
