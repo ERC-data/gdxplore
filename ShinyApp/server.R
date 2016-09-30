@@ -423,7 +423,7 @@ shinyServer(function(input, output) {
       rows=c('Sector'),
       col = 'Commodity_Name',
       aggregatorName=deflt_aggr,
-      inclusions = list(Year = list('2006')),
+      inclusions = list(Year = list('2006'),Case = list(myinclusion)),
       vals= 'flow_PJ',
       rendererName = 'Table'
     )
