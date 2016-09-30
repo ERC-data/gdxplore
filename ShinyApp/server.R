@@ -7,7 +7,7 @@ mycollist = c('Year')
 deflt_aggr = 'Sum'
 deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
-tmp = paste(gdxlist[1])
+tmp = names(tmplist[1])
 myinclusion = strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
 
 # Define server logic required to draw a histogram
@@ -63,15 +63,24 @@ shinyServer(function(input, output) {
     )
     
   })
-  
+  output$ele_indicatorspivottable <- renderRpivotTable({
+    rpivotTable(
+      pwr_indicators,
+      rows = 'Case',
+      col = 'Year',
+      aggregatorName = 'Sum',
+      vals = 'Elec_price_RpkWh',
+      rendererName = 'Line Chart'
+    )
+  })
   output$pwremispivottable <- renderRpivotTable({
     rpivotTable(
       pwr_emis,
-      rows='Commodity',
+      rows='Emissions',
       col = mycollist,
       aggregatorName='Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals='F_OUT',
+      vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
     
@@ -82,11 +91,11 @@ shinyServer(function(input, output) {
   output$refemispivottable <- renderRpivotTable({
     rpivotTable(
       refs_emis,
-      rows='Commodity',
+      rows='Emissions',
       col = mycollist,
       aggregatorName='Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals='F_OUT',
+      vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
     
@@ -119,11 +128,11 @@ shinyServer(function(input, output) {
   output$resemispivottable <- renderRpivotTable({
     rpivotTable(
       res_emis,
-      rows=c('Commodity'),
+      rows=c('Emissions_source'),
       col = mycollist,
       aggregatorName='Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals='F_OUT',
+      vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
   })
@@ -181,11 +190,11 @@ shinyServer(function(input, output) {
   output$indemispivottable <- renderRpivotTable({
     rpivotTable(
       ind_emis,
-      rows=c('Commodity'),
+      rows=c('Emissions_source'),
       col = mycollist,
       aggregatorName='Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals='F_OUT',
+      vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
   })
@@ -260,11 +269,11 @@ shinyServer(function(input, output) {
   output$traemispivottable <- renderRpivotTable({
     rpivotTable(
       tra_emis,
-      rows=c('Commodity'),
+      rows=c('Emissions'),
       col = mycollist,
       aggregatorName='Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals='F_OUT',
+      vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
   })
@@ -387,11 +396,11 @@ shinyServer(function(input, output) {
   output$comemispivottable <- renderRpivotTable({
     rpivotTable(
       com_emis,
-      rows=c('Commodity'),
+      rows=c('Emissions'),
       col = mycollist,
       aggregatorName='Sum',
       inclusions = list(Case = list(myinclusion)),
-      vals='F_OUT',
+      vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
   })
@@ -403,8 +412,20 @@ shinyServer(function(input, output) {
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(myinclusion)),
-      vals= 'F_OUT',
+      vals= 'GHG_kt',
       rendererName = 'Stacked Bar Chart'
+    )
+    
+  })
+  output$EBpivottable <- renderRpivotTable({
+    rpivotTable(
+      EB,
+      rows=c('Sector'),
+      col = 'Commodity_Name',
+      aggregatorName=deflt_aggr,
+      inclusions = list(Year = list('2006'),Case = list(myinclusion)),
+      vals= 'flow_PJ',
+      rendererName = 'Table'
     )
     
   })

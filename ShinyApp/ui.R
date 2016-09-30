@@ -1,12 +1,14 @@
 library(shiny)
 library(rpivotTable)
+attach('C:/EMOD/RDSfiles/savedRenv.RData')
 
-shinyUI(navbarPage("GDXplorer",tabPanel('Power',
+shinyUI(navbarPage("SATIMviz",tabPanel('Power',
                                         tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('pwr_cappivottable')),
                                                     tabPanel('New Capacity',rpivotTableOutput('pwr_ncappivottable')),
                                                     tabPanel('Flows',rpivotTableOutput('pwr_flowspivottable')),
                                                     tabPanel('Costs',rpivotTableOutput('pwr_costspivottable')),
-                                                    tabPanel("Emissions",rpivotTableOutput('pwremispivottable')))),
+                                                    tabPanel("Emissions",rpivotTableOutput('pwremispivottable')),
+                                                    tabPanel('Indicators',rpivotTableOutput('ele_indicatorspivottable')))),
         tabPanel("Residential",
                  tabsetPanel(tabPanel('Flows',rpivotTableOutput('resfpivottable')),
                              tabPanel('Costs',rpivotTableOutput('rescpivottable')),
@@ -32,7 +34,8 @@ shinyUI(navbarPage("GDXplorer",tabPanel('Power',
                              tabPanel('Costs',rpivotTableOutput('comcpivottable')),
                              tabPanel("Emissions",rpivotTableOutput('comemispivottable')))),
         tabPanel('Emissions',rpivotTableOutput('allemispivottable')),
-        tabPanel('Coal Prices',rpivotTableOutput('clprpivottable'))
+        tabPanel('Energy Balance',rpivotTableOutput('EBpivottable'))
+        
       )#navbarpage
       
 )#main panel
