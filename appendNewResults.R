@@ -1,19 +1,16 @@
 #take newscenario.rds and append to existing_processed_scenarios.rds main list 
 
   #GET NAME OF RDS FILE FROM COMMAND PROMPT
-  cmd_rdsfile <- commandArgs(trailingOnly = TRUE) #this must be the file name eg: 01REF (without the .gdx extension)
-  newrdsname = cmd_rdsfile[1]
+  cmd_rdsname <- commandArgs(trailingOnly = TRUE) #this must be the file name eg: 01REF (without the .rds extension)
+  newrdsname = cmd_rdsname[1]
 
 rdsfileslocation = 'C:/EMOD/RDSfiles'
-newrdsfilename = paste(newrdsname,'.rds',sep = '') #location of the new rds that will be appended to existing
+newrdsfilename = paste(newrdsname,'.rds',sep = '') #file name of the new results. example: 01REF.rds 
 
-newgdxname = newrdsname
 newrdsfilepath= paste(rdsfileslocation,newrdsfilename,sep = '/')
 
 details = file.info(list.files(rdsfileslocation,pattern="*.rds"))
-rdsfilename = rownames(details)[grepl('processed',rownames(details))] #get the most recent modified grouped results rds file to append to
-
-existfilepath = rdsfilepath #location of the existing processed results rds file
+existfilepath = rownames(details)[grepl('processed',rownames(details))] #get the most recent modified grouped results rds file to append to
 
 if (!file.exists(existfilepath)){
   #if there isnt an rds file in the path then make a blank list 
@@ -29,7 +26,6 @@ print('appending new processed result to existing one...')
   #note: this will overwrite results with the same name (ie replace an old REF01)
   
   newgdxresults = readRDS(newrdsfilepath)
-  
   newrds = existrds
   newrds[[newgdxname]] = newgdxresults
   print('done appending new result to rds')
