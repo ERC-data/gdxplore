@@ -10,15 +10,17 @@ newrdsfilename = paste(newrdsname,'.rds',sep = '') #file name of the new results
 newrdsfilepath= paste(rdsfileslocation,newrdsfilename,sep = '/')
 
 details = file.info(list.files(rdsfileslocation,pattern="*.rds"))
-existfilepath = rownames(details)[grepl('processed',rownames(details))] #get the most recent modified grouped results rds file to append to
+existfilename = rownames(details)[grepl('processed',rownames(details))] #get the most recent modified grouped results rds file to append to
+existfilelocation = paste(rdsfileslocation,existfilename,sep = '/')
 
-if (!file.exists(existfilepath)){
-  #if there isnt an rds file in the path then make a blank list 
+if (file.exists(existfilelocation)){
+  print('reading in the existing processed results RDS file')
+  existrds = readRDS(existfilelocation)
+}else{
+  #if there isnt an rds file with 'processed' in the name in the path then make a blank list
   print('Creating blank rds file to append to.')
   existrds = list()
-}else{
-  print('reading in the existing processed results RDS file')
-  existrds = readRDS(existfilepath)
+  existfilelocation = paste(existfilelocation,'scenarios_processed.rds',sep = '/')#file doesnt exist. so make up the new name to save to at the end
 }
 
 
@@ -27,14 +29,14 @@ print('appending new processed result to existing one...')
   
   newgdxresults = readRDS(newrdsfilepath)
   newrds = existrds
-  newrds[[newgdxname]] = newgdxresults
+  newrds[[newrdsname]] = newgdxresults
   print('done appending new result to rds')
 
 
 #saving
 print('saving RDS file')
-rdsname = paste(paste(projname,'processed',sep = '_'),dt,sep ='_')
-saveRDS(newrds,paste(saverdspath,paste(rdsname,'.rds',sep = ''),sep=''))
+saverdspath = existfilelocation
+saveRDS(newrds,saverdspath)
 print('saving complete')
 
 
