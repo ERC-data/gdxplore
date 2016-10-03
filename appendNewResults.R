@@ -1,53 +1,42 @@
-#appending new results to existing results
+#take newscenario.rds and append to existing_processed_scenarios.rds main list 
 
-library(reshape2)
-library(gdxrrw) 
-library(dplyr)
-library(XLConnect)
+  #GET NAME OF RDS FILE FROM COMMAND PROMPT
+  cmd_rdsfile <- commandArgs(trailingOnly = TRUE) #this must be the file name eg: 01REF (without the .gdx extension)
+  newrdsname = cmd_rdsfile[1]
 
-newfilepath = 'C:/Users/01425453/Desktop/Student R layout/GDXfiles/03REF14T.gdx' #location of the new gdx to be processed and appended
-newgdxname = '03REF14T'
-  
+rdsfileslocation = 'C:/EMOD/RDSfiles'
+newrdsfilename = paste(newrdsname,'.rds',sep = '') #location of the new rds that will be appended to existing
+
+newgdxname = newrdsname
+newrdsfilepath= paste(rdsfileslocation,newrdsfilename,sep = '/')
+
+details = file.info(list.files(rdsfileslocation,pattern="*.rds"))
+rdsfilename = rownames(details)[grepl('processed',rownames(details))] #get the most recent modified grouped results rds file to append to
+
 existfilepath = rdsfilepath #location of the existing processed results rds file
 
+if (!file.exists(existfilepath)){
+  #if there isnt an rds file in the path then make a blank list 
+  print('Creating blank rds file to append to.')
+  existrds = list()
+}else{
+  print('reading in the existing processed results RDS file')
+  existrds = readRDS(existfilepath)
+}
 
-#workdir should already be initiated
-#workdir = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/'
-
-GAMS_lib_dir = 'C:/GAMS/win64/24.7'  # location of your GAMS main directory. 
-
-# connect to the GAMS library.
-igdx(GAMS_lib_dir) 
-
-
-#LOAD FUNCTIONS
-source(paste(workdir,'extractResults_v5.R',sep =''))
-
-
-
-#======================get existing processed set of results and append new ones
-print('reading in the existing processed results RDS file')
-existrds = readRDS(existfilepath)
 
 print('appending new processed result to existing one...')
-if(newgdxname %in% names(existrds)){
-  #make sure there is no scenario/gdxname in the existing file already
-  msg = paste(c("A scenario ",newgdxname,' ','already exists!!!'),collapse = '')
-  stop(msg)
-  #####EXIT HERE
-}else{
-  #======================process and extract results from the new gdx
-  print('Processing gdx to append...')
-  newgdxresults = processGDX(newfilepath,newgdxname)
+  #note: this will overwrite results with the same name (ie replace an old REF01)
+  
+  newgdxresults = readRDS(newrdsfilepath)
   
   newrds = existrds
   newrds[[newgdxname]] = newgdxresults
   print('done appending new result to rds')
-}
+
 
 #saving
 print('saving RDS file')
-dt = format(Sys.time(), "%d%b%Y")
 rdsname = paste(paste(projname,'processed',sep = '_'),dt,sep ='_')
 saveRDS(newrds,paste(saverdspath,paste(rdsname,'.rds',sep = ''),sep=''))
 print('saving complete')
