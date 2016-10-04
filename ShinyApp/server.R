@@ -7,12 +7,29 @@ mycollist = c('Year')
 deflt_aggr = 'Sum'
 deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
-tmp = names(tmplist[1])
-myinclusion = strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
+#tmp = names(tmplist[1])
+myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
+
+source('C:/EMOD/Rfiles/grouprdsfiles.R')#load the groupfiles function
+source('C:/EMOD/Rfiles/appendNewResults.R')#load the append new result function 
+source('C:/EMOD/Rfiles/load_dataframes.R')# this is the load the pivottable dataframes into the environment 
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
+  
+  output$row <- renderPrint({
+    input$group
+  })
+  
+  the_selection <- eventReactive(input$ViewNowButton,{
+    groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
+    load_dataframesEnv() #load the dataframes in grouped_scenarios into the R environmnet
+    #attach('C:/EMOD/RDSfiles/savedRenv.RData')#load the dataframes
+    #shiny::runApp('C:/EMOD/Rfiles/ShinyApp',launch.browser = TRUE)#run the Viewer
+  })
+  
+  output$row2 <- renderText({the_selection()})
   
   #POWER TABS ============================================
   output$pwr_cappivottable <- renderRpivotTable({
