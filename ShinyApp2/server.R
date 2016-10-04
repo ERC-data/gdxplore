@@ -2,7 +2,7 @@
 #Server
 
 library(shiny)
-source('C:/EMOD/grouprdsfiles.R')#load this function
+source('C:/EMOD/Rfiles/grouprdsfiles.R')#load this function
 
 function(input, output) {
   
