@@ -3,14 +3,13 @@
 # RUN the shiny viewer
 
 
+load_dataframesEnv <- function(){
 
 #get first processed rds file 
 thispath = 'C:/EMOD/Rfiles/'
 rdspath = 'C:/EMOD/RDSfiles/'
-setwd(rdspath)
 
-details = file.info(list.files(pattern="*.rds"))
-details = details[with(details, order(as.POSIXct(mtime))), ]
+details = file.info(rdspath,list.files(pattern="*.rds"))
 rdsfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))]#get the grouped scenarios rds file 
 rdsfilepath = paste(rdspath,rdsfilename,sep = '/')
 
@@ -93,3 +92,4 @@ for (i in 1:n){
 
 save.image(file = 'savedRenv.RData')
 print('...Dataframes loaded')
+}
