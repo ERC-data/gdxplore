@@ -1,6 +1,6 @@
-#read in the saved rds file for the extracted results
-#create all dataframes for the pivot tables
-#RUN the shiny viewer
+# 
+# create all dataframes for the pivot tables
+# RUN the shiny viewer
 
 
 
@@ -11,8 +11,7 @@ setwd(rdspath)
 
 details = file.info(list.files(pattern="*.rds"))
 details = details[with(details, order(as.POSIXct(mtime))), ]
-rdsfilename = rownames(details)[dim(details)[1]] #get the most recent modified rds file to process
-
+rdsfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))]#get the grouped scenarios rds file 
 rdsfilepath = paste(rdspath,rdsfilename,sep = '/')
 
 tmplist = list()
