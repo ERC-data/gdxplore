@@ -90,6 +90,6 @@ for (i in 1:n){
   EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
 }
 
-save.image(file = 'savedRenv.RData')
+save.image(file = 'C:/EMOD/RDSfiles/savedRenv.RData')
 print('...Dataframes loaded')
 }
