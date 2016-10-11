@@ -9,10 +9,10 @@ load_dataframesEnv <- function(){
 thispath = 'C:/EMOD/Rfiles/'
 rdspath = 'C:/EMOD/RDSfiles/'
 
-details = file.info(rdspath,list.files(pattern="*.rds"))
+details = file.info(list.files(rdspath,pattern="*.rds"))
 rdsfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))]#get the grouped scenarios rds file 
 rdsfilepath = paste(rdspath,rdsfilename,sep = '/')
-
+print(paste('reading in....',rdsfilepath))
 tmplist = list()
 pwrdf = data.frame()
 pwr_cap = pwr_ncap = pwr_flows = pwr_costs = pwr_indicators =EB = data.frame()
@@ -86,7 +86,7 @@ for (i in 1:n){
   sup_emis = rbind(sup_emis,as.data.frame(tmplist[[i]][31]))
   refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
   all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
-  pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
+  #pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
   EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
 }
 
