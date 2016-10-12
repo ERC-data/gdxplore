@@ -5,11 +5,15 @@ rdsfileslocation = 'C:/EMOD/RDSfiles/'
 
 details = file.info(list.files(rdsfileslocation,pattern="*.rds"))#get list of all rds files 
 details = details[with(details, order(as.POSIXct(mtime))), ]#order my last modified
-rdslist = rownames(details)[!(grepl('processed',rownames(details)))] #get all rds files which are do not have 'processed' in the name ie - only scenarios. 
+rdslist = rownames(details)[!(grepl('grouped',rownames(details)))] #get all rds files which are do not have 'processed' in the name ie - only scenarios. 
 rdslist = gsub('.{4}$', '', rdslist)# remove the .rds extension from file name
 
-shinyUI(navbarPage("SATIMviz",tabPanel('Selection',
-                                       selectizeInput('group', NULL, NULL, multiple = TRUE, choices= rdslist),actionButton("ViewNowButton",'View now')),
+shinyUI(navbarPage("SATIMviz",tabPanel('Selections',sidebarLayout(sidebarPanel(
+                                                                        selectizeInput('group', NULL, NULL, multiple = TRUE, choices= rdslist),
+                                                                        actionButton("GroupandViewButton",'View results')
+                                                                      ),mainPanel(verbatimTextOutput('row'))
+                                                                      )#sidebarlayout
+                                                                      ),
                    
                    tabPanel('Power',
                                         tabsetPanel(tabPanel('Total Capacity',rpivotTableOutput('pwr_cappivottable')),

@@ -22,19 +22,123 @@ shinyServer(function(input, output) {
     input$group
   })
   
-  the_selection <- eventReactive(input$ViewNowButton,{
-    groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
-    load_dataframesEnv() #load the dataframes in grouped_scenarios into the R environmnet
-    #attach('C:/EMOD/RDSfiles/savedRenv.RData')#load the dataframes
-    #shiny::runApp('C:/EMOD/Rfiles/ShinyApp',launch.browser = TRUE)#run the Viewer
-  })
+  #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
+  variables = reactiveValues(pwrdf = data.frame(),pwr_cap =data.frame(), pwr_ncap =data.frame(), pwr_flows =data.frame(), pwr_costs =data.frame(), pwr_indicators =data.frame(),EB = data.frame(),
+                             tradf =data.frame(), tra_flows =data.frame(), tra_costs =data.frame(), tra_cap =data.frame(), tra_ncap = data.frame(),refs_costs =data.frame(), refs_flows =data.frame(),
+                             refs_ncap =data.frame(), refs_cap =data.frame(),pwr_emis =data.frame(), ind_emis =data.frame(), res_emis =data.frame(), com_emis =data.frame(), tra_emis =data.frame(),
+                             sup_emis=data.frame(), refs_emis=data.frame(), all_emis =data.frame(), data.frame(),resdf = data.frame(),res_flows = data.frame(),res_cost = data.frame(),inddf = data.frame(),
+                             ind_costs = data.frame(),ind_flows =data.frame(),comdf  = data.frame(),com_costs = data.frame(),com_flows = data.frame(),clpricesdf = data.frame(),varactdf = data.frame()
+  )
   
-  output$row2 <- renderText({the_selection()})
+  #READING REACTIVELY THE DATAFRAMES THE USERS WANTS TO VIEW
+  
+  observeEvent(input$GroupandViewButton,{
+    print('grouping selection...')
+    groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
+
+    details = file.info(list.files(rdspath,pattern="*.rds"))#get the now grouped rds file (that was created with groupfiles)
+    rdsfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))]#get the grouped scenarios rds file 
+    rdsfilepath = paste(rdspath,rdsfilename,sep = '')
+    print('reading in ')
+    print(rdsfilepath)
+    tmplist = readRDS(rdsfilepath)
+    
+    pwr_cap = data.frame()
+    n = length(tmplist)
+    
+    for (i in 1:n){
+      print(i)
+      
+      pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
+      pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
+      pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
+      pwr_costs = rbind(pwr_costs,as.data.frame(tmplist[[i]][5]))
+      
+      tradf = rbind(tradf,as.data.frame(tmplist[[i]][6]))
+      tra_flows = rbind(tra_flows,as.data.frame(tmplist[[i]][18]))
+      tra_costs = rbind(tra_costs,as.data.frame(tmplist[[i]][19]))
+      tra_cap = rbind(tra_cap,as.data.frame(tmplist[[i]][20]))
+      tra_ncap = rbind(tra_ncap,as.data.frame(tmplist[[i]][21]))
+      
+      clpricesdf = rbind(clpricesdf, as.data.frame(tmplist[[i]][7]))
+      
+      varactdf = rbind(varactdf, as.data.frame(tmplist[[i]][8]))
+      
+      inddf = rbind(inddf,as.data.frame(tmplist[[i]][9]))
+      ind_flows = rbind(ind_flows,as.data.frame(tmplist[[i]][10]))
+      ind_costs = rbind(ind_costs,as.data.frame(tmplist[[i]][11]))
+      
+      resdf = rbind(resdf,as.data.frame(tmplist[[i]][12]))
+      res_flows = rbind(res_flows,as.data.frame(tmplist[[i]][13]))
+      res_cost = rbind(res_cost,as.data.frame(tmplist[[i]][14]))
+      
+      comdf = rbind(comdf, as.data.frame(tmplist[[i]][15]))
+      com_costs = rbind(com_costs,as.data.frame(tmplist[[i]][16]))
+      com_flows = rbind(com_flows,as.data.frame(tmplist[[i]][17]))
+      
+      refs_flows = rbind(refs_flows,as.data.frame(tmplist[[i]][22]))
+      refs_costs = rbind(refs_costs,as.data.frame(tmplist[[i]][23]))
+      refs_cap = rbind(refs_cap,as.data.frame(tmplist[[i]][24]))
+      refs_ncap = rbind(refs_ncap,as.data.frame(tmplist[[i]][25]))
+      
+      pwr_emis = rbind(pwr_emis,as.data.frame(tmplist[[i]][26]))
+      ind_emis = rbind(ind_emis,as.data.frame(tmplist[[i]][27]))
+      res_emis = rbind(res_emis,as.data.frame(tmplist[[i]][28]))
+      com_emis = rbind(com_emis,as.data.frame(tmplist[[i]][29]))
+      tra_emis = rbind(tra_emis,as.data.frame(tmplist[[i]][30]))
+      sup_emis = rbind(sup_emis,as.data.frame(tmplist[[i]][31]))
+      refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
+      all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
+      pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
+      EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
+      
+    }
+    #now assign the newly read in dataframes to reactive variables
+    variables$pwr_cap = pwr_cap
+    variables$pwr_ncap = pwr_ncap
+    variables$pwr_flows = pwr_flows
+    variables$pwr_costs = pwr_costs
+    variables$tradf = tradf
+    variables$tra_flows = tra_flows
+    variables$tra_costs = tra_costs
+    variables$tra_cap = tra_cap
+    variables$tra_ncap = tra_ncap
+    variables$clpricesdf = clpricesdf
+    variables$varactdf = varactdf
+    variables$inddf = inddf
+    variables$ind_flows = ind_flows
+    variables$ind_costs = ind_costs
+    variables$resdf = resdf
+    variables$res_flows = res_flows
+    variables$res_costs = res_costs
+    variables$comdf = comdf
+    variables$com_costs = com_costs
+    variables$com_flows = com_flows
+    variables$refs_flows = refs_flows
+    variables$refs_costs = refs_costs
+    variables$refs_cap = refs_cap
+    variables$refs_ncap = refs_ncap
+    variables$pwr_emis = pwr_emis
+    variables$ind_emis = ind_emis
+    variables$res_emis = res_emis
+    variables$com_emis = com_emis
+    variables$tra_emis = tra_emis
+    variables$sup_emis = sup_emis
+    variables$refs_emis = refs_emis
+    variables$all_emis = all_emis
+    variables$pwr_indicators = pwr_indicators
+    variables$EB = EB
+    
+    
+    print('done')
+  })
+  #END OF READING IN DATAFRAMES INTO THE ENVIRONMENT
+  
   
   #POWER TABS ============================================
   output$pwr_cappivottable <- renderRpivotTable({
     rpivotTable(
-      pwr_cap,
+      variables$pwr_cap,
       rows= 'Subsector',
       col = mycollist,
       aggregatorName= 'Sum',
@@ -46,7 +150,7 @@ shinyServer(function(input, output) {
   })
   output$pwr_ncappivottable <- renderRpivotTable({
     rpivotTable(
-      pwr_ncap,
+      variables$pwr_ncap,
       rows=myrowlist,
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -58,7 +162,7 @@ shinyServer(function(input, output) {
   })
   output$pwr_flowspivottable <- renderRpivotTable({
     rpivotTable(
-      pwr_flows,
+      variables$pwr_flows,
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -70,7 +174,7 @@ shinyServer(function(input, output) {
   })
   output$pwr_costspivottable <- renderRpivotTable({
     rpivotTable(
-      pwr_costs,
+      variables$pwr_costs,
       rows=c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName= 'Sum',
@@ -82,7 +186,7 @@ shinyServer(function(input, output) {
   })
   output$ele_indicatorspivottable <- renderRpivotTable({
     rpivotTable(
-      pwr_indicators,
+      variables$pwr_indicators,
       rows = 'Case',
       col = 'Year',
       aggregatorName = 'Sum',
@@ -92,7 +196,7 @@ shinyServer(function(input, output) {
   })
   output$pwremispivottable <- renderRpivotTable({
     rpivotTable(
-      pwr_emis,
+      variables$pwr_emis,
       rows='Emissions',
       col = mycollist,
       aggregatorName='Sum',
@@ -107,7 +211,7 @@ shinyServer(function(input, output) {
   
   output$refemispivottable <- renderRpivotTable({
     rpivotTable(
-      refs_emis,
+      variables$refs_emis,
       rows='Emissions',
       col = mycollist,
       aggregatorName='Sum',
@@ -121,7 +225,7 @@ shinyServer(function(input, output) {
   #RESIDENTIAL ==================================
   output$resfpivottable <- renderRpivotTable({
     rpivotTable(
-      res_flows,
+      variables$res_flows,
       rows=c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -132,7 +236,7 @@ shinyServer(function(input, output) {
   })
   output$rescpivottable <- renderRpivotTable({
     rpivotTable(
-      res_cost,
+      variables$res_cost,
       rows= c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -144,7 +248,7 @@ shinyServer(function(input, output) {
   
   output$resemispivottable <- renderRpivotTable({
     rpivotTable(
-      res_emis,
+      variables$res_emis,
       rows=c('Emissions_source'),
       col = mycollist,
       aggregatorName='Sum',
@@ -159,7 +263,7 @@ shinyServer(function(input, output) {
   
   output$pwrpivottable <- renderRpivotTable({
     rpivotTable(
-      pwrdf,
+      variables$pwrdf,
       rows=myrowlist,
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -172,7 +276,7 @@ shinyServer(function(input, output) {
   #INDUSTRy ================================
   output$indpivottable <- renderRpivotTable({
     rpivotTable(
-      inddf,
+      variables$inddf,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -183,7 +287,7 @@ shinyServer(function(input, output) {
     })
   output$indfpivottable <- renderRpivotTable({
     rpivotTable(
-      ind_flows,
+      variables$ind_flows,
       rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -194,7 +298,7 @@ shinyServer(function(input, output) {
   })
   output$indcpivottable <- renderRpivotTable({
     rpivotTable(
-      ind_costs,
+      variables$ind_costs,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -206,7 +310,7 @@ shinyServer(function(input, output) {
   
   output$indemispivottable <- renderRpivotTable({
     rpivotTable(
-      ind_emis,
+      variables$ind_emis,
       rows=c('Emissions_source'),
       col = mycollist,
       aggregatorName='Sum',
@@ -223,7 +327,7 @@ shinyServer(function(input, output) {
   
   output$trapivottable <- renderRpivotTable({
     rpivotTable(
-      tradf,
+      variables$tradf,
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -236,7 +340,7 @@ shinyServer(function(input, output) {
   
   output$tracappivottable <- renderRpivotTable({
     rpivotTable(
-      tra_cap,
+      variables$tra_cap,
       rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -248,7 +352,7 @@ shinyServer(function(input, output) {
   })
   output$trafpivottable <- renderRpivotTable({
     rpivotTable(
-      tra_flows,
+      variables$tra_flows,
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -260,7 +364,7 @@ shinyServer(function(input, output) {
   })
   output$tracpivottable <- renderRpivotTable({
     rpivotTable(
-      tra_costs,
+      variables$tra_costs,
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -272,7 +376,7 @@ shinyServer(function(input, output) {
   })
   output$trancappivottable <- renderRpivotTable({
     rpivotTable(
-      tra_ncap,
+      variables$tra_ncap,
       rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -285,7 +389,7 @@ shinyServer(function(input, output) {
   
   output$traemispivottable <- renderRpivotTable({
     rpivotTable(
-      tra_emis,
+      variables$tra_emis,
       rows=c('Emissions'),
       col = mycollist,
       aggregatorName='Sum',
@@ -300,7 +404,7 @@ shinyServer(function(input, output) {
   
   output$refcappivottable <- renderRpivotTable({
     rpivotTable(
-      refs_cap,
+      variables$refs_cap,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -312,7 +416,7 @@ shinyServer(function(input, output) {
   })
   output$reffpivottable <- renderRpivotTable({
     rpivotTable(
-      refs_flows,
+      variables$refs_flows,
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -325,7 +429,7 @@ shinyServer(function(input, output) {
   
   output$refcpivottable <- renderRpivotTable({
     rpivotTable(
-      refs_costs,
+      variables$refs_costs,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -337,7 +441,7 @@ shinyServer(function(input, output) {
   })
   output$refncappivottable <- renderRpivotTable({
     rpivotTable(
-      refs_ncap,
+      variables$refs_ncap,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -350,7 +454,7 @@ shinyServer(function(input, output) {
   
   output$respivottable <- renderRpivotTable({
     rpivotTable(
-      resdf,
+      variables$resdf,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -362,7 +466,7 @@ shinyServer(function(input, output) {
   })
   output$compivottable <- renderRpivotTable({
     rpivotTable(
-      comdf,
+      variables$comdf,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -375,7 +479,7 @@ shinyServer(function(input, output) {
   # COMMERCE =========================================
   output$comfpivottable <- renderRpivotTable({
     rpivotTable(
-      com_flows,
+      variables$com_flows,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -387,7 +491,7 @@ shinyServer(function(input, output) {
   })
   output$comcpivottable <- renderRpivotTable({
     rpivotTable(
-      com_costs,
+      variables$com_costs,
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -399,7 +503,7 @@ shinyServer(function(input, output) {
   })
   output$varpivottable <- renderRpivotTable({
     rpivotTable(
-      varactdf,
+      variables$varactdf,
       rows=c('Case','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -412,7 +516,7 @@ shinyServer(function(input, output) {
   
   output$comemispivottable <- renderRpivotTable({
     rpivotTable(
-      com_emis,
+      variables$com_emis,
       rows=c('Emissions'),
       col = mycollist,
       aggregatorName='Sum',
@@ -424,7 +528,7 @@ shinyServer(function(input, output) {
   
   output$allemispivottable <- renderRpivotTable({
     rpivotTable(
-      all_emis,
+      variables$all_emis,
       rows=c('Sector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
@@ -436,7 +540,7 @@ shinyServer(function(input, output) {
   })
   output$EBpivottable <- renderRpivotTable({
     rpivotTable(
-      EB,
+      variables$EB,
       rows=c('Sector'),
       col = 'Commodity_Name',
       aggregatorName=deflt_aggr,
