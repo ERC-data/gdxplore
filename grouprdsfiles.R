@@ -9,7 +9,7 @@ groupfiles = function (rdslist){ #the character vec of rds files to group
     newrdsfilename = paste(rdslist[i],'.rds',sep = '') #file name of the new results. example: 01REF.rds 
     newrdsfilepath= paste('C:/EMOD/RDSfiles',newrdsfilename,sep = '/')
     newgdxresults = readRDS(newrdsfilepath)
-    
+    newrdsname = rdslist[i] #give it the same name as the scenario
     newrds[newrdsname] = newgdxresults #append, and give it the same name as the scenario name
     
   } 
