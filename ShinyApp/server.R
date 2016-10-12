@@ -11,9 +11,6 @@ deflt_view = 'Heatmap'
 myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
 
 source('C:/EMOD/Rfiles/grouprdsfiles.R')#load the groupfiles function
-source('C:/EMOD/Rfiles/appendNewResults.R')#load the append new result function 
-source('C:/EMOD/Rfiles/load_dataframes.R')# this is the load the pivottable dataframes into the environment 
-
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
@@ -23,11 +20,42 @@ shinyServer(function(input, output) {
   })
   
   #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
-  variables = reactiveValues(pwrdf = data.frame(),pwr_cap =data.frame(), pwr_ncap =data.frame(), pwr_flows =data.frame(), pwr_costs =data.frame(), pwr_indicators =data.frame(),EB = data.frame(),
-                             tradf =data.frame(), tra_flows =data.frame(), tra_costs =data.frame(), tra_cap =data.frame(), tra_ncap = data.frame(),refs_costs =data.frame(), refs_flows =data.frame(),
-                             refs_ncap =data.frame(), refs_cap =data.frame(),pwr_emis =data.frame(), ind_emis =data.frame(), res_emis =data.frame(), com_emis =data.frame(), tra_emis =data.frame(),
-                             sup_emis=data.frame(), refs_emis=data.frame(), all_emis =data.frame(), data.frame(),resdf = data.frame(),res_flows = data.frame(),res_cost = data.frame(),inddf = data.frame(),
-                             ind_costs = data.frame(),ind_flows =data.frame(),comdf  = data.frame(),com_costs = data.frame(),com_flows = data.frame(),clpricesdf = data.frame(),varactdf = data.frame()
+  variables = reactiveValues(pwrdf = data.frame(),
+                             pwr_cap =data.frame(),
+                             pwr_ncap =data.frame(),
+                             pwr_flows =data.frame(),
+                             pwr_costs =data.frame(),
+                             pwr_indicators =data.frame(),
+                             EB = data.frame(),
+                             tradf =data.frame(),
+                             tra_flows =data.frame(),
+                             tra_costs =data.frame(),
+                             tra_cap =data.frame(),
+                             tra_ncap = data.frame(),
+                             refs_costs =data.frame(),
+                             refs_flows =data.frame(),
+                             refs_ncap =data.frame(),
+                             refs_cap =data.frame(),
+                             pwr_emis =data.frame(),
+                             ind_emis =data.frame(),
+                             res_emis =data.frame(),
+                             com_emis =data.frame(),
+                             tra_emis =data.frame(),
+                             sup_emis=data.frame(),
+                             refs_emis=data.frame(),
+                             all_emis =data.frame(),
+                             resdf = data.frame(),
+                             res_flows = data.frame(),
+                             res_cost = data.frame(),
+                             inddf = data.frame(),
+                             ind_costs = data.frame(),
+                             ind_flows =data.frame(),
+                             comdf  = data.frame(),
+                             com_costs = data.frame(),
+                             com_flows = data.frame(),
+                             clpricesdf = data.frame(),
+                             varactdf = data.frame(),
+                             myinclusion = 'temp'
   )
   
   #READING REACTIVELY THE DATAFRAMES THE USERS WANTS TO VIEW
@@ -43,7 +71,6 @@ shinyServer(function(input, output) {
     print(rdsfilepath)
     tmplist = readRDS(rdsfilepath)
     
-    pwr_cap = data.frame()
     n = length(tmplist)
     
     for (i in 1:n){
@@ -110,7 +137,7 @@ shinyServer(function(input, output) {
     variables$ind_costs = ind_costs
     variables$resdf = resdf
     variables$res_flows = res_flows
-    variables$res_costs = res_costs
+    variables$res_cost = res_cost
     variables$comdf = comdf
     variables$com_costs = com_costs
     variables$com_flows = com_flows
@@ -129,7 +156,8 @@ shinyServer(function(input, output) {
     variables$pwr_indicators = pwr_indicators
     variables$EB = EB
     
-    
+    casenames = unique(pwr_cap$Case)
+    variables$myinclusion = sort(casenames)[1]
     print('done')
   })
   #END OF READING IN DATAFRAMES INTO THE ENVIRONMENT
@@ -142,7 +170,7 @@ shinyServer(function(input, output) {
       rows= 'Subsector',
       col = mycollist,
       aggregatorName= 'Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'Capacity',
       rendererName = 'Stacked Bar Chart'
     )
@@ -154,7 +182,7 @@ shinyServer(function(input, output) {
       rows=myrowlist,
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'NCAPL',
       rendererName = 'Stacked Bar Chart'
     )
@@ -166,7 +194,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='F_IN',
       rendererName = deflt_view
     )
@@ -178,7 +206,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName= 'Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='CST_INVC',
       rendererName = 'Stacked Bar Chart'
     )
@@ -200,7 +228,7 @@ shinyServer(function(input, output) {
       rows='Emissions',
       col = mycollist,
       aggregatorName='Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -215,7 +243,7 @@ shinyServer(function(input, output) {
       rows='Emissions',
       col = mycollist,
       aggregatorName='Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -229,7 +257,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='F_IN',
       rendererName = deflt_view
     )
@@ -240,7 +268,7 @@ shinyServer(function(input, output) {
       rows= c('Subsector','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='Allcosts',
       rendererName = deflt_view
     )
@@ -252,7 +280,7 @@ shinyServer(function(input, output) {
       rows=c('Emissions_source'),
       col = mycollist,
       aggregatorName='Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -267,7 +295,7 @@ shinyServer(function(input, output) {
       rows=myrowlist,
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals=deflt_vals,
       rendererName = deflt_view
     )
@@ -280,7 +308,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -291,7 +319,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -302,7 +330,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'Allcosts',
       rendererName = deflt_view
     )
@@ -314,7 +342,7 @@ shinyServer(function(input, output) {
       rows=c('Emissions_source'),
       col = mycollist,
       aggregatorName='Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -331,7 +359,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -344,7 +372,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'Capacity',
       rendererName = 'Stacked Bar Chart'
     )
@@ -356,7 +384,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -368,7 +396,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'CST_INVC',
       rendererName = deflt_view
     )
@@ -380,7 +408,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'NCAPL',
       rendererName = 'Stacked Bar Chart'
     )
@@ -393,7 +421,7 @@ shinyServer(function(input, output) {
       rows=c('Emissions'),
       col = mycollist,
       aggregatorName='Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -408,7 +436,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'Capacity',
       rendererName = 'Stacked Bar Chart'
     )
@@ -420,7 +448,7 @@ shinyServer(function(input, output) {
       rows=c('Subsector','Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -433,7 +461,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'Allcosts',
       rendererName = 'Stacked Bar Chart'
     )
@@ -445,7 +473,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'NCAPL',
       rendererName = 'Stacked Bar Chart'
     )
@@ -458,7 +486,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -470,7 +498,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -483,7 +511,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -495,7 +523,7 @@ shinyServer(function(input, output) {
       rows=c('Subsubsector','Commodity_Name'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'F_IN',
       rendererName = deflt_view
     )
@@ -507,7 +535,7 @@ shinyServer(function(input, output) {
       rows=c('Case','Subsubsector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'VAR_ACT',
       rendererName = deflt_view
     )
@@ -520,7 +548,7 @@ shinyServer(function(input, output) {
       rows=c('Emissions'),
       col = mycollist,
       aggregatorName='Sum',
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -532,7 +560,7 @@ shinyServer(function(input, output) {
       rows=c('Sector'),
       col = mycollist,
       aggregatorName=deflt_aggr,
-      inclusions = list(Case = list(myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
@@ -544,7 +572,7 @@ shinyServer(function(input, output) {
       rows=c('Sector'),
       col = 'Commodity_Name',
       aggregatorName=deflt_aggr,
-      inclusions = list(Year = list('2006'),Case = list(myinclusion)),
+      inclusions = list(Year = list('2006'),Case = list(variables$myinclusion)),
       vals= 'flow_PJ',
       rendererName = 'Table'
     )
