@@ -34,7 +34,7 @@ print('appending new processed result to existing one...')
   
   newgdxresults = readRDS(newrdsfilepath)
   newrds = existrds
-  newrds[[newrdsname]] = newgdxresults
+  newrds[newrdsname] = newgdxresults
   print('done appending new result to rds')
 
 
