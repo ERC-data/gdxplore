@@ -63,7 +63,16 @@ shinyServer(function(input, output) {
   observeEvent(input$GroupandViewButton,{
     print('grouping selection...')
     groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
-
+    
+    #define empty dataframes
+    tmplist = list()
+    pwrdf = pwr_cap = pwr_ncap = pwr_flows = pwr_costs = pwr_indicators =EB = 
+      tradf = tra_flows = tra_costs = tra_cap = tra_ncap = refs_costs = refs_flows =
+      refs_ncap = refs_cap =pwr_emis = ind_emis = res_emis = com_emis = tra_emis =
+      sup_emis= refs_emis= all_emis = resdf = res_flows = res_cost = inddf = 
+      ind_costs = ind_flows =comdf  = com_costs = com_flows = clpricesdf = varactdf = data.frame()
+    
+    
     details = file.info(list.files(rdspath,pattern="*.rds"))#get the now grouped rds file (that was created with groupfiles)
     rdsfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))]#get the grouped scenarios rds file 
     rdsfilepath = paste(rdspath,rdsfilename,sep = '')
