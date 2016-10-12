@@ -1,55 +1,47 @@
-#appending new results to existing results
-
-library(reshape2)
-library(gdxrrw) 
-library(dplyr)
-library(XLConnect)
-
-newfilepath = 'C:/Users/01425453/Desktop/Student R layout/GDXfiles/03REF14T.gdx' #location of the new gdx to be processed and appended
-newgdxname = '03REF14T'
-  
-existfilepath = rdsfilepath #location of the existing processed results rds file
+#take newscenario.rds and append to scenarios_processed.rds main list 
+#this is now a function
 
 
-#workdir should already be initiated
-#workdir = 'C:/Users/01425453/Google Drive/SATIM/R codes and outputs/SATIM General Outputs/'
-
-GAMS_lib_dir = 'C:/GAMS/win64/24.7'  # location of your GAMS main directory. 
-
-# connect to the GAMS library.
-igdx(GAMS_lib_dir) 
+#  #GET NAME OF RDS FILE FROM COMMAND PROMPT
+#  cmd_rdsname <- commandArgs(trailingOnly = TRUE) #this must be the file name eg: 01REF (without the .rds extension)
+# newrdsname = cmd_rdsname[1]
 
 
-#LOAD FUNCTIONS
-source(paste(workdir,'extractResults_v5.R',sep =''))
+appendRDSfile <- function(newrdsname){
+print(paste('Appending ',newrdsname,sep =' '))
+rdsfileslocation = 'C:/EMOD/RDSfiles'
+newrdsfilename = paste(newrdsname,'.rds',sep = '') #file name of the new results. example: 01REF.rds 
 
+newrdsfilepath= paste(rdsfileslocation,newrdsfilename,sep = '/')
 
+details = file.info(list.files(rdsfileslocation,pattern="*.rds"))
+existfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))] #get the most recent modified grouped results rds file to append to
+existfilelocation = paste(rdsfileslocation,existfilename,sep = '/')
 
-#======================get existing processed set of results and append new ones
-print('reading in the existing processed results RDS file')
-existrds = readRDS(existfilepath)
+if (file.exists(existfilelocation)){
+  print('reading in the existing processed results RDS file')
+  existrds = readRDS(existfilelocation)
+}else{
+  #if there isnt an rds file with 'processed' in the name in the path then make a blank list
+  print('Creating blank rds file to append to.')
+  existrds = list()
+  existfilelocation = paste(existfilelocation,'grouped_scenarios.rds',sep = '/')#file doesnt exist. so make up the new name to save to at the end
+}
+
 
 print('appending new processed result to existing one...')
-if(newgdxname %in% names(existrds)){
-  #make sure there is no scenario/gdxname in the existing file already
-  msg = paste(c("A scenario ",newgdxname,' ','already exists!!!'),collapse = '')
-  stop(msg)
-  #####EXIT HERE
-}else{
-  #======================process and extract results from the new gdx
-  print('Processing gdx to append...')
-  newgdxresults = processGDX(newfilepath,newgdxname)
+  #note: this will overwrite results with the same name (ie replace an old REF01)
   
+  newgdxresults = readRDS(newrdsfilepath)
   newrds = existrds
-  newrds[[newgdxname]] = newgdxresults
+  newrds[newrdsname] = newgdxresults
   print('done appending new result to rds')
-}
+
 
 #saving
 print('saving RDS file')
-dt = format(Sys.time(), "%d%b%Y")
-rdsname = paste(paste(projname,'processed',sep = '_'),dt,sep ='_')
-saveRDS(newrds,paste(saverdspath,paste(rdsname,'.rds',sep = ''),sep=''))
+saverdspath = existfilelocation
+saveRDS(newrds,saverdspath)
 print('saving complete')
-
+}
 
