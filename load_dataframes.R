@@ -2,9 +2,6 @@
 # create all dataframes for the pivot tables
 # RUN the shiny viewer
 
-
-load_dataframesEnv <- function(){
-
 #get first processed rds file 
 thispath = 'C:/EMOD/Rfiles/'
 rdspath = 'C:/EMOD/RDSfiles/'
@@ -92,4 +89,3 @@ for (i in 1:n){
 
 save.image(file = 'C:/EMOD/RDSfiles/savedRenv.RData')
 print('...Dataframes loaded')
-}
