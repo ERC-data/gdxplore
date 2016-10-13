@@ -9,10 +9,10 @@ deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
 #tmp = names(tmplist[1])
 myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
-
+rdspath = 'C:/EMOD/RDSfiles/'
 source('C:/EMOD/Rfiles/grouprdsfiles.R')#load the groupfiles function
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(function(input, output,session) {
   
   
   output$row <- renderPrint({
@@ -62,7 +62,12 @@ shinyServer(function(input, output) {
   
   observeEvent(input$GroupandViewButton,{
     print('grouping selection...')
-    groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
+    
+    withProgress(message = 'Grouping Your Selection...',value = 0,{
+      groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
+      incProgress(1,detail = paste('done'))
+      Sys.sleep(0.1)
+    })
     
     #define empty dataframes
     tmplist = list()
@@ -81,10 +86,10 @@ shinyServer(function(input, output) {
     tmplist = readRDS(rdsfilepath)
     
     n = length(tmplist)
-    
+    withProgress(message = 'Loading into Viewer',value = 0,{
     for (i in 1:n){
       print(i)
-      
+      incProgress(1/n,detail = paste(paste('Loading scenario ',i,sep = ''),'into viewer'))
       pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
       pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
       pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
@@ -127,8 +132,9 @@ shinyServer(function(input, output) {
       all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
       pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
       EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
-      
+      Sys.sleep(0.1)
     }
+    })
     #now assign the newly read in dataframes to reactive variables
     variables$pwr_cap = pwr_cap
     variables$pwr_ncap = pwr_ncap
@@ -167,7 +173,7 @@ shinyServer(function(input, output) {
     
     casenames = unique(pwr_cap$Case)
     variables$myinclusion = sort(casenames)[1]
-    print('done')
+    updateNavbarPage(session,'powertabs',selected = 'Total Capacity')#switch the user to the first results panel
   })
   #END OF READING IN DATAFRAMES INTO THE ENVIRONMENT
   
