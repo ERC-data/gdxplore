@@ -173,7 +173,7 @@ shinyServer(function(input, output,session) {
     
     casenames = unique(pwr_cap$Case)
     variables$myinclusion = sort(casenames)[1]
-    updateNavbarPage(session,'powertabs',selected = 'Total Capacity')#switch the user to the first results panel
+    updateTabsetPanel(session,'powertabs',selected = 'totalcapacity')#switch the user to the first results panel
   })
   #END OF READING IN DATAFRAMES INTO THE ENVIRONMENT
   
