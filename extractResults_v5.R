@@ -541,10 +541,11 @@ processGDX <- function(gdxPath,gdxname){
     
     #REFINERIES
     print('...refineries')
-    refs_flows = merge(VARACT[VARACT$Sector =='Refineries',],F_INa)
-    refs_flows[is.na(refs_flows)] = 0
-    refs_flows = refs_flows[,!(names(refs_flows)%in% c('Sector','Timeslice'))]
-    refs_flows$Case = myCase
+    refsfout = F_OUTa[F_OUTa$Sector == 'Refineries'&F_OUTa$Commodity_Name != '',]
+    refsin = F_INa[F_INa$Sector == 'Refineries'&F_INa$Commodity_Name != '',]
+    refsvaract =VARACT[VARACT$Sector == 'Refineries',]
+    refs_flows = merge(refsvaract,merge(refsin,refsfout,all = TRUE),all = TRUE)
+    refs_flows$Case= myCase
     refs_flows[duplicated(paste(paste(refs_flows$VAR_ACT,refs_flows$Process),refs_flows$Year)),'VAR_ACT'] = 0# we get duplicate var_act for each F_IN commodity, make the duplicates 0 (except one of them)
     refs_flows = droplevels(refs_flows)
     
