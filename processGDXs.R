@@ -38,20 +38,15 @@ tmplist = list()
 
 for (i in (1:N)){
   gdxPath = paste(gdxLocation,gdxlist[i],sep = '')
-  listname = gdxlist[i]
+  listname = gsub('.{4}$', '', gdxlist[i])
   gdxname = substr(gdxlist[i],1,nchar(gdxlist[i])-4)
   
   tmplist[[listname]] = processGDX(gdxPath,gdxname)
-  
-  if(i ==N){
-    print('saving RDS file')
-    dt = format(Sys.time(), "%d%b%Y")
-    rdsname = paste(paste(projname,'processed',sep = '_'),dt,sep ='_')
-    saveRDS(tmplist,paste(saverdspath,paste(rdsname,'.rds',sep = ''),sep = ''))
-    print('saving complete')
+  rdsname = paste(listname,'.rds',sep ='')
+  saveRDS(tmplist,paste(saverdspath,rdsname,sep = ''))
+  print('saving complete')
     
     #now have a list of lists - one list for each gdx
     #now need to take each df out of each gdx list and append to masterdf's for each subsector
     
   }
-}
