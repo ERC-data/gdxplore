@@ -3,7 +3,7 @@ library(rpivotTable)
 library(ckanr) #for data portal
 
 ckanr_setup(url = 'http://energydata.uct.ac.za') #set the url to the CKAN data portal
-rdslist <- package_show('tp2-model-outputs', as = 'table')$resources$name #ckanr API call
+rdslist <- sort(package_show('tp2-model-outputs', as = 'table')$resources$name) #ckanr API call
 
 shinyUI(navbarPage("SATIMviz",tabPanel('Scenario Selection',sidebarLayout(sidebarPanel(
                                                                         selectizeInput('group','Scenario list', NULL, multiple = TRUE, choices= rdslist),
