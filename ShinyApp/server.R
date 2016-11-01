@@ -1,5 +1,6 @@
 library(shiny)
 library(rpivotTable)
+source('grouprdsfiles.R')#load the groupfiles function
 
 myrowlist = c('Subsubsector')
 mycollist = c('Year')
@@ -7,7 +8,6 @@ deflt_aggr = 'Sum'
 deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
 myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
-source('../grouprdsfiles.R')#load the groupfiles function
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
   
