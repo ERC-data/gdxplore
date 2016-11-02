@@ -1,5 +1,4 @@
-library(shiny)
-library(rpivotTable)
+source('setup.R')
 
 rdsfileslocation = 'C:/EMOD/RDSfiles/'
 
