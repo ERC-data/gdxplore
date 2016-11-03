@@ -1,4 +1,4 @@
-packages = c('ckanr','SOAR','shiny','rpivotTable','rprojroot','kimisc')
+packages = c('ckanr','SOAR','shiny','rpivotTable','rprojroot')
 for (p in packages){
   if (p %in% rownames(installed.packages())){
     lapply(p, library, character.only = TRUE)
@@ -8,6 +8,5 @@ for (p in packages){
   }
 }
 
-path = dirname(thisfile_source())
-setwd(path)
-source('grouprdsfiles.R') #load the groupfiles function
+path = getwd()
+source(paste(path, 'grouprdsfiles.R',sep='/')) #load the groupfiles function

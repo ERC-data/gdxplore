@@ -1,4 +1,4 @@
-source('setup.R')
+source('setup.R', chdir=T)
 
 myrowlist = c('Subsubsector')
 mycollist = c('Year')

@@ -1,4 +1,4 @@
-source('setup.R')
+source('setup.R', chdir=T)
 
 rdsfileslocation = 'C:/EMOD/RDSfiles/'
 
