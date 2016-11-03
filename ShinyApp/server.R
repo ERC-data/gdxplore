@@ -15,6 +15,8 @@ shinyServer(function(input, output,session) {
     input$group
   })
   
+  my_dataset <- 'tp2-model-outputs'
+  
   #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
   variables = reactiveValues(pwrdf = data.frame(),
                              pwr_cap =data.frame(),
@@ -60,7 +62,7 @@ shinyServer(function(input, output,session) {
     print('grouping selection...')
     
     withProgress(message = 'Grouping Your Selection...',value = 0,{
-      groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
+      groupfiles(input$group, my_dataset)#group the selected files and save to 'grouped_scenarios' rds file
       incProgress(1,detail = paste('done'))
       Sys.sleep(0.1)
     })
