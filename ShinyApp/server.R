@@ -9,7 +9,7 @@ deflt_vals = 'Capacity'
 deflt_view = 'Heatmap'
 myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
 # Define server logic required to draw a histogram
-shinyServer(function(input, output,session) {
+shinyServer(function(input, output, session) {
   
   output$row <- renderPrint({
     input$group
