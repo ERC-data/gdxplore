@@ -1,4 +1,8 @@
-packages = c('ckanr','SOAR','shiny','rpivotTable','rprojroot')
+# Set required variables
+path <- getwd()
+
+# Install and load required packages
+packages <- c('ckanr','SOAR','shiny','rpivotTable','rprojroot')
 for (p in packages){
   if (p %in% rownames(installed.packages())){
     lapply(p, library, character.only = TRUE)
@@ -8,5 +12,5 @@ for (p in packages){
   }
 }
 
-path = getwd()
-source(paste(path, 'grouprdsfiles.R',sep='/')) #load the groupfiles function
+# Source requried files
+source(paste(path, 'functions.R',sep='/')) #load the groupfiles function

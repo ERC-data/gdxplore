@@ -1,11 +1,7 @@
 source('setup.R', chdir=T)
 
-rdsfileslocation = 'C:/EMOD/RDSfiles/'
-
-details = file.info(list.files(rdsfileslocation,pattern="*.rds"))#get list of all rds files 
-details = details[with(details, order(as.POSIXct(mtime))), ]#order my last modified
-rdslist = rownames(details)[!(grepl('grouped',rownames(details)))] #get all rds files which are do not have 'processed' in the name ie - only scenarios. 
-rdslist = gsub('.{4}$', '', rdslist)# remove the .rds extension from file name
+dataset <- NULL
+rdslist <- rdslist(dataset)
 
 shinyUI(navbarPage("SATIMviz",tabPanel('Scenario Selection',sidebarLayout(sidebarPanel(
                                                                         selectizeInput('group','Scenario list', NULL, multiple = TRUE, choices= rdslist),
