@@ -5,7 +5,7 @@ library(ckanr) #for data portal
 ckanr_setup(url = 'http://energydata.uct.ac.za') #set the url to the CKAN data portal
 rdslist <- package_show('tp2-model-outputs', as = 'table')$resources #ckanr API call
 
-shinyUI(navbarPage("SATIMviz",
+shinyUI(navbarPage(title = 'SATIMviz', id = "mainMenu",
 
     # sidebarlayout               
     tabPanel('Scenario Selection',
