@@ -65,7 +65,13 @@ shinyServer(function(input, output, session) {
       groupfiles(input$group, my_dataset)#group the selected files and save to 'grouped_scenarios' rds file
       incProgress(1,detail = paste('done'))
       Sys.sleep(0.1)
-    })
+  })
+    
+  observe({
+      if (input$GroupandViewButton > 0) {
+        session$sendCustomMessage('activeNavs', 'Power')
+      }
+  })
     
     #define empty dataframes
     pwrdf = pwr_cap = pwr_ncap = pwr_flows = pwr_costs = pwr_indicators =EB = 
