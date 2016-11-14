@@ -67,6 +67,7 @@ shinyServer(function(input, output,session) {
       groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
       incProgress(1,detail = paste('done'))
       Sys.sleep(0.1)
+      updateNavbarPage(session, 'mainMenu', 'Power')
     })
     
     #define empty dataframes
