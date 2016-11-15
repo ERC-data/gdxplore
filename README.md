@@ -12,9 +12,11 @@ Clone the git repository into your project's parent directory. You can find inst
 git clone https://github.com/ERC-data/satimviz.git
 ```
 If you want to use the application in its default local mode, it is essential that all your model output files are saved as `.rds` files in a subfolder called `RDSfiles` contained within your project parent directory. The directory structure should thus be as follows:  
-`\parent dir`  
-`\parent dir\RDSfiles # containing all your scenarios saved as .rds files`  
-`\parent dir\satimviz # cloned from github as described above`
+```{r}
+\parent dir 
+\parent dir\RDSfiles # containing all your scenarios saved as .rds files
+\parent dir\satimviz # cloned from github as described above
+```
 
 ### Execution
 To run the visualisation locally, simply open and run `ShinyApp\ui.R` in R.
