@@ -11,7 +11,9 @@ Clone the git repository into your project's parent directory. You can find inst
 ```
 git clone https://github.com/ERC-data/satimviz.git
 ```
+
 If you want to use the application in its default local mode, it is essential that all your model output files are saved as `.rds` files in a subfolder called `RDSfiles` contained within your project parent directory. The directory structure should thus be as follows:  
+
 ```
 \parent dir 
 \parent dir\RDSfiles # containing all your scenarios saved as .rds files
@@ -21,7 +23,7 @@ If you want to use the application in its default local mode, it is essential th
 ### Execution
 To run the visualisation locally, simply open and run `ShinyApp\ui.R` in R.
 
-To run the CKAN compatible version, you need to make the following modification in **line 13** in the `ShinyApp\setup.R` file:
+To run the CKAN compatible version, you need to replace `NULL` with your ckan dataset's ID in line 13 in the `ShinyApp\setup.R` file:
 ```{r}
 13  dataset <- your-ckan-dataset-id
 ```  
