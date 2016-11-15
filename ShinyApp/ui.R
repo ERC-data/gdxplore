@@ -8,7 +8,7 @@ details = details[with(details, order(as.POSIXct(mtime))), ]#order my last modif
 rdslist = rownames(details)[!(grepl('grouped',rownames(details)))] #get all rds files which are do not have 'processed' in the name ie - only scenarios. 
 rdslist = gsub('.{4}$', '', rdslist)# remove the .rds extension from file name
 
-shinyUI(navbarPage("SATIMviz",tabPanel('Scenario Selection',sidebarLayout(sidebarPanel(
+shinyUI(navbarPage(title="SATIMviz", id='mainMenu', tabPanel('Scenario Selection',sidebarLayout(sidebarPanel(
                                                                         selectizeInput('group','Scenario list', NULL, multiple = TRUE, choices= rdslist),
                                                                         actionButton("GroupandViewButton",'View results')
                                                                       ),mainPanel(verbatimTextOutput('row'))
