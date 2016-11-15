@@ -91,6 +91,7 @@ shinyServer(function(input, output,session) {
       print(i)
       incProgress(1/n,detail = paste(paste('Loading scenario ',i,sep = ''),'into viewer'))
       pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
+      print(unique(pwr_cap$Case))
       pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
       pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
       pwr_costs = rbind(pwr_costs,as.data.frame(tmplist[[i]][5]))
