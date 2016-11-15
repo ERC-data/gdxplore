@@ -1,71 +1,68 @@
 source('setup.R', chdir=T)
 
-myrowlist = c('Subsubsector')
-mycollist = c('Year')
-deflt_aggr = 'Sum'
-deflt_vals = 'Capacity'
-deflt_view = 'Heatmap'
+myrowlist <- c('Subsubsector')
+mycollist <- c('Year')
+deflt_aggr <- 'Sum'
+deflt_vals <- 'Capacity'
+deflt_view <- 'Heatmap'
 
-myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) #NOTE This will have to be automatic
-rdspath = 'C:/EMOD/RDSfiles/'
+myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) # NOTE This will have to be automatic
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output,session) {
-  
-  
-  output$row <- renderPrint({
-    input$group
-  })
+shinyServer(function(input, output, session) {
+    output$row <- renderPrint({
+        input$group
+        })
   
   #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
-  variables = reactiveValues(pwrdf = data.frame(),
-                             pwr_cap =data.frame(),
-                             pwr_ncap =data.frame(),
-                             pwr_flows =data.frame(),
-                             pwr_costs =data.frame(),
-                             pwr_indicators =data.frame(),
-                             EB = data.frame(),
-                             tradf =data.frame(),
-                             tra_flows =data.frame(),
-                             tra_costs =data.frame(),
-                             tra_cap =data.frame(),
-                             tra_ncap = data.frame(),
-                             refs_costs =data.frame(),
-                             refs_flows =data.frame(),
-                             refs_ncap =data.frame(),
-                             refs_cap =data.frame(),
-                             pwr_emis =data.frame(),
-                             ind_emis =data.frame(),
-                             res_emis =data.frame(),
-                             com_emis =data.frame(),
-                             tra_emis =data.frame(),
-                             sup_emis=data.frame(),
-                             refs_emis=data.frame(),
-                             all_emis =data.frame(),
-                             resdf = data.frame(),
-                             res_flows = data.frame(),
-                             res_cost = data.frame(),
-                             inddf = data.frame(),
-                             ind_costs = data.frame(),
-                             ind_flows =data.frame(),
-                             comdf  = data.frame(),
-                             com_costs = data.frame(),
-                             com_flows = data.frame(),
-                             clpricesdf = data.frame(),
-                             varactdf = data.frame(),
-                             myinclusion = 'temp'
-  )
+    variables <- reactiveValues(pwrdf = data.frame(),
+                                pwr_cap = data.frame(),
+                                pwr_ncap = data.frame(),
+                                pwr_flows = data.frame(),
+                                pwr_costs = data.frame(),
+                                pwr_indicators = data.frame(),
+                                EB = data.frame(),
+                                tradf = data.frame(),
+                                tra_flows = data.frame(),
+                                tra_costs = data.frame(),
+                                tra_cap = data.frame(),
+                                tra_ncap = data.frame(),
+                                refs_costs = data.frame(),
+                                refs_flows = data.frame(),
+                                refs_ncap = data.frame(),
+                                refs_cap = data.frame(),
+                                pwr_emis = data.frame(),
+                                ind_emis = data.frame(),
+                                res_emis = data.frame(),
+                                com_emis = data.frame(),
+                                tra_emis = data.frame(),
+                                sup_emis = data.frame(),
+                                refs_emis= data.frame(),
+                                all_emis = data.frame(),
+                                resdf = data.frame(),
+                                res_flows = data.frame(),
+                                res_cost = data.frame(),
+                                inddf = data.frame(),
+                                ind_costs = data.frame(),
+                                ind_flows = data.frame(),
+                                comdf  = data.frame(),
+                                com_costs = data.frame(),
+                                com_flows = data.frame(),
+                                clpricesdf = data.frame(),
+                                varactdf = data.frame(),
+                                myinclusion = 'temp'
+                                )
   
   #READING REACTIVELY THE DATAFRAMES THE USERS WANTS TO VIEW
   
-  observeEvent(input$GroupandViewButton,{
-    print('grouping selection...')
-    
-    withProgress(message = 'Grouping Your Selection...',value = 0,{
-      groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
-      incProgress(1,detail = paste('done'))
-      Sys.sleep(0.1)
-    })
+  observeEvent(input$GroupandViewButton, {
+      print('grouping selection...')
+      withProgress(message = 'Grouping Your Selection...',value = 0,{
+          groupfiles(input$group, dataset) # cache user's input selection
+          incProgress(1, detail = paste('done'))
+          Sys.sleep(0.1)
+          updateNavbarPage(session, 'mainMenu', 'Power')
+          })
     
     #define empty dataframes
     tmplist = list()
@@ -75,13 +72,7 @@ shinyServer(function(input, output,session) {
       sup_emis= refs_emis= all_emis = resdf = res_flows = res_cost = inddf = 
       ind_costs = ind_flows =comdf  = com_costs = com_flows = clpricesdf = varactdf = data.frame()
     
-    
-    details = file.info(list.files(rdspath,pattern="*.rds"))#get the now grouped rds file (that was created with groupfiles)
-    rdsfilename = rownames(details)[grepl('grouped_scenarios',rownames(details))]#get the grouped scenarios rds file 
-    rdsfilepath = paste(rdspath,rdsfilename,sep = '')
-    print('reading in ')
-    print(rdsfilepath)
-    tmplist = readRDS(rdsfilepath)
+    tmplist = newrds # retrieve cached object from groupfiles function
     
     n = length(tmplist)
     withProgress(message = 'Loading into Viewer',value = 0,{
