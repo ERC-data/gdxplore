@@ -3,4 +3,4 @@
 */.R_Cache
 *.RData
 ShinyApp/rsconnect/
-
+*.html
