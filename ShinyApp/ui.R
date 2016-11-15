@@ -61,4 +61,3 @@ shinyUI(navbarPage(title = 'SATIMviz', id = 'mainMenu',
 
     tabPanel('Energy Balance',rpivotTableOutput('EBpivottable'))
 ))
-

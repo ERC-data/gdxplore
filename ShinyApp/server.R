@@ -55,75 +55,76 @@ shinyServer(function(input, output, session) {
   
   #READING REACTIVELY THE DATAFRAMES THE USERS WANTS TO VIEW
   
-  observeEvent(input$GroupandViewButton, {
-      print('grouping selection...')
-      withProgress(message = 'Grouping Your Selection...',value = 0,{
-          groupfiles(input$group, dataset) # cache user's input selection
-          incProgress(1, detail = paste('done'))
-          Sys.sleep(0.1)
-          updateNavbarPage(session, 'mainMenu', 'Power')
-          })
+    observeEvent(input$GroupandViewButton, {
+        print('grouping selection...')
+        withProgress(message = 'Grouping Your Selection...',value = 0,{
+            groupfiles(input$group, dataset) # cache user's input selection
+            incProgress(1, detail = paste('done'))
+            Sys.sleep(0.1)
+            updateNavbarPage(session, 'mainMenu', 'Power')
+            })
     
-    #define empty dataframes
-    tmplist = list()
-    pwrdf = pwr_cap = pwr_ncap = pwr_flows = pwr_costs = pwr_indicators =EB = 
-      tradf = tra_flows = tra_costs = tra_cap = tra_ncap = refs_costs = refs_flows =
-      refs_ncap = refs_cap =pwr_emis = ind_emis = res_emis = com_emis = tra_emis =
-      sup_emis= refs_emis= all_emis = resdf = res_flows = res_cost = inddf = 
-      ind_costs = ind_flows =comdf  = com_costs = com_flows = clpricesdf = varactdf = data.frame()
+        #define empty dataframes
+        tmplist = list()
+        pwrdf = pwr_cap = pwr_ncap = pwr_flows = pwr_costs = pwr_indicators =EB = 
+            tradf = tra_flows = tra_costs = tra_cap = tra_ncap = refs_costs = refs_flows =
+            refs_ncap = refs_cap =pwr_emis = ind_emis = res_emis = com_emis = tra_emis =
+            sup_emis= refs_emis= all_emis = resdf = res_flows = res_cost = inddf = 
+            ind_costs = ind_flows =comdf  = com_costs = com_flows = clpricesdf = varactdf = data.frame()
+        
+        tmplist = newrds # retrieve cached object from groupfiles function
+        
+        n = length(tmplist)
+        withProgress(message = 'Loading into Viewer',value = 0,{
+        for (i in 1:n){
+            print(i)
+            incProgress(1/n,detail = paste(paste('Loading scenario ',i,sep = ''),'into viewer'))
+            pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
+            pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
+            pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
+            pwr_costs = rbind(pwr_costs,as.data.frame(tmplist[[i]][5]))
+          
+            tradf = rbind(tradf,as.data.frame(tmplist[[i]][6]))
+            tra_flows = rbind(tra_flows,as.data.frame(tmplist[[i]][18]))
+            tra_costs = rbind(tra_costs,as.data.frame(tmplist[[i]][19]))
+            tra_cap = rbind(tra_cap,as.data.frame(tmplist[[i]][20]))
+            tra_ncap = rbind(tra_ncap,as.data.frame(tmplist[[i]][21]))
+            
+            clpricesdf = rbind(clpricesdf, as.data.frame(tmplist[[i]][7]))
+            
+            varactdf = rbind(varactdf, as.data.frame(tmplist[[i]][8]))
+            
+            inddf = rbind(inddf,as.data.frame(tmplist[[i]][9]))
+            ind_flows = rbind(ind_flows,as.data.frame(tmplist[[i]][10]))
+            ind_costs = rbind(ind_costs,as.data.frame(tmplist[[i]][11]))
+            
+            resdf = rbind(resdf,as.data.frame(tmplist[[i]][12]))
+            res_flows = rbind(res_flows,as.data.frame(tmplist[[i]][13]))
+            res_cost = rbind(res_cost,as.data.frame(tmplist[[i]][14]))
+            
+            comdf = rbind(comdf, as.data.frame(tmplist[[i]][15]))
+            com_costs = rbind(com_costs,as.data.frame(tmplist[[i]][16]))
+            com_flows = rbind(com_flows,as.data.frame(tmplist[[i]][17]))
+            
+            refs_flows = rbind(refs_flows,as.data.frame(tmplist[[i]][22]))
+            refs_costs = rbind(refs_costs,as.data.frame(tmplist[[i]][23]))
+            refs_cap = rbind(refs_cap,as.data.frame(tmplist[[i]][24]))
+            refs_ncap = rbind(refs_ncap,as.data.frame(tmplist[[i]][25]))
+            
+            pwr_emis = rbind(pwr_emis,as.data.frame(tmplist[[i]][26]))
+            ind_emis = rbind(ind_emis,as.data.frame(tmplist[[i]][27]))
+            res_emis = rbind(res_emis,as.data.frame(tmplist[[i]][28]))
+            com_emis = rbind(com_emis,as.data.frame(tmplist[[i]][29]))
+            tra_emis = rbind(tra_emis,as.data.frame(tmplist[[i]][30]))
+            sup_emis = rbind(sup_emis,as.data.frame(tmplist[[i]][31]))
+            refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
+            all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
+            pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
+            EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
+            Sys.sleep(0.1)
+            }
+            })
     
-    tmplist = newrds # retrieve cached object from groupfiles function
-    
-    n = length(tmplist)
-    withProgress(message = 'Loading into Viewer',value = 0,{
-    for (i in 1:n){
-      print(i)
-      incProgress(1/n,detail = paste(paste('Loading scenario ',i,sep = ''),'into viewer'))
-      pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
-      pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
-      pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
-      pwr_costs = rbind(pwr_costs,as.data.frame(tmplist[[i]][5]))
-      
-      tradf = rbind(tradf,as.data.frame(tmplist[[i]][6]))
-      tra_flows = rbind(tra_flows,as.data.frame(tmplist[[i]][18]))
-      tra_costs = rbind(tra_costs,as.data.frame(tmplist[[i]][19]))
-      tra_cap = rbind(tra_cap,as.data.frame(tmplist[[i]][20]))
-      tra_ncap = rbind(tra_ncap,as.data.frame(tmplist[[i]][21]))
-      
-      clpricesdf = rbind(clpricesdf, as.data.frame(tmplist[[i]][7]))
-      
-      varactdf = rbind(varactdf, as.data.frame(tmplist[[i]][8]))
-      
-      inddf = rbind(inddf,as.data.frame(tmplist[[i]][9]))
-      ind_flows = rbind(ind_flows,as.data.frame(tmplist[[i]][10]))
-      ind_costs = rbind(ind_costs,as.data.frame(tmplist[[i]][11]))
-      
-      resdf = rbind(resdf,as.data.frame(tmplist[[i]][12]))
-      res_flows = rbind(res_flows,as.data.frame(tmplist[[i]][13]))
-      res_cost = rbind(res_cost,as.data.frame(tmplist[[i]][14]))
-      
-      comdf = rbind(comdf, as.data.frame(tmplist[[i]][15]))
-      com_costs = rbind(com_costs,as.data.frame(tmplist[[i]][16]))
-      com_flows = rbind(com_flows,as.data.frame(tmplist[[i]][17]))
-      
-      refs_flows = rbind(refs_flows,as.data.frame(tmplist[[i]][22]))
-      refs_costs = rbind(refs_costs,as.data.frame(tmplist[[i]][23]))
-      refs_cap = rbind(refs_cap,as.data.frame(tmplist[[i]][24]))
-      refs_ncap = rbind(refs_ncap,as.data.frame(tmplist[[i]][25]))
-      
-      pwr_emis = rbind(pwr_emis,as.data.frame(tmplist[[i]][26]))
-      ind_emis = rbind(ind_emis,as.data.frame(tmplist[[i]][27]))
-      res_emis = rbind(res_emis,as.data.frame(tmplist[[i]][28]))
-      com_emis = rbind(com_emis,as.data.frame(tmplist[[i]][29]))
-      tra_emis = rbind(tra_emis,as.data.frame(tmplist[[i]][30]))
-      sup_emis = rbind(sup_emis,as.data.frame(tmplist[[i]][31]))
-      refs_emis = rbind(refs_emis,as.data.frame(tmplist[[i]][32]))
-      all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
-      pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
-      EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
-      Sys.sleep(0.1)
-    }
-    })
     #now assign the newly read in dataframes to reactive variables
     variables$pwr_cap = pwr_cap
     variables$pwr_ncap = pwr_ncap
@@ -178,8 +179,8 @@ shinyServer(function(input, output, session) {
       vals= 'Capacity',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
+    
   output$pwr_ncappivottable <- renderRpivotTable({
     rpivotTable(
       variables$pwr_ncap,
@@ -190,8 +191,8 @@ shinyServer(function(input, output, session) {
       vals= 'NCAPL',
       rendererName = 'Stacked Bar Chart'
     )
-    
-  })
+      })
+  
   output$pwr_flowspivottable <- renderRpivotTable({
     rpivotTable(
       variables$pwr_flows,
@@ -202,8 +203,8 @@ shinyServer(function(input, output, session) {
       vals='F_IN',
       rendererName = deflt_view
     )
-    
   })
+  
   output$pwr_costspivottable <- renderRpivotTable({
     rpivotTable(
       variables$pwr_costs,
@@ -214,8 +215,8 @@ shinyServer(function(input, output, session) {
       vals='CST_INVC',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
+  
   output$ele_indicatorspivottable <- renderRpivotTable({
     rpivotTable(
       variables$pwr_indicators,
@@ -226,6 +227,7 @@ shinyServer(function(input, output, session) {
       rendererName = 'Line Chart'
     )
   })
+  
   output$pwremispivottable <- renderRpivotTable({
     rpivotTable(
       variables$pwr_emis,
@@ -236,7 +238,6 @@ shinyServer(function(input, output, session) {
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
   
   #========================================================
@@ -251,7 +252,6 @@ shinyServer(function(input, output, session) {
       vals='GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
   
   #RESIDENTIAL ==================================
@@ -266,6 +266,7 @@ shinyServer(function(input, output, session) {
       rendererName = deflt_view
     )
   })
+  
   output$rescpivottable <- renderRpivotTable({
     rpivotTable(
       variables$res_cost,
@@ -292,7 +293,6 @@ shinyServer(function(input, output, session) {
   
   #   ============================
   
-  
   output$pwrpivottable <- renderRpivotTable({
     rpivotTable(
       variables$pwrdf,
@@ -317,6 +317,7 @@ shinyServer(function(input, output, session) {
       rendererName = deflt_view
     )
     })
+  
   output$indfpivottable <- renderRpivotTable({
     rpivotTable(
       variables$ind_flows,
@@ -351,12 +352,8 @@ shinyServer(function(input, output, session) {
       rendererName = 'Stacked Bar Chart'
     )
   })
-  
-  #     ===================================
-  
-  
+
   # TRANSPORT ===================================
-  
   output$trapivottable <- renderRpivotTable({
     rpivotTable(
       variables$tradf,
@@ -367,7 +364,6 @@ shinyServer(function(input, output, session) {
       vals= 'F_IN',
       rendererName = deflt_view
     )
-    
   })
   
   output$tracappivottable <- renderRpivotTable({
@@ -380,8 +376,8 @@ shinyServer(function(input, output, session) {
       vals= 'Capacity',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
+  
   output$trafpivottable <- renderRpivotTable({
     rpivotTable(
       variables$tra_flows,
@@ -404,8 +400,8 @@ shinyServer(function(input, output, session) {
       vals= 'CST_INVC',
       rendererName = deflt_view
     )
-    
   })
+  
   output$trancappivottable <- renderRpivotTable({
     rpivotTable(
       variables$tra_ncap,
@@ -416,7 +412,6 @@ shinyServer(function(input, output, session) {
       vals= 'NCAPL',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
   
   output$traemispivottable <- renderRpivotTable({
@@ -431,9 +426,7 @@ shinyServer(function(input, output, session) {
     )
   })
   
-  
   #REFINERIES =============================================
-  
   output$refcappivottable <- renderRpivotTable({
     rpivotTable(
       variables$refs_cap,
@@ -444,8 +437,8 @@ shinyServer(function(input, output, session) {
       vals= 'Capacity',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
+  
   output$reffpivottable <- renderRpivotTable({
     rpivotTable(
       variables$refs_flows,
@@ -456,7 +449,6 @@ shinyServer(function(input, output, session) {
       vals= 'F_IN',
       rendererName = deflt_view
     )
-    
   })
   
   output$refcpivottable <- renderRpivotTable({
@@ -469,8 +461,8 @@ shinyServer(function(input, output, session) {
       vals= 'Allcosts',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
+  
   output$refncappivottable <- renderRpivotTable({
     rpivotTable(
       variables$refs_ncap,
@@ -481,7 +473,6 @@ shinyServer(function(input, output, session) {
       vals= 'NCAPL',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
   
   output$respivottable <- renderRpivotTable({
@@ -494,8 +485,8 @@ shinyServer(function(input, output, session) {
       vals= 'F_IN',
       rendererName = deflt_view
     )
-    
   })
+  
   output$compivottable <- renderRpivotTable({
     rpivotTable(
       variables$comdf,
@@ -506,8 +497,8 @@ shinyServer(function(input, output, session) {
       vals= 'F_IN',
       rendererName = deflt_view
     )
-    
   })
+  
   # COMMERCE =========================================
   output$comfpivottable <- renderRpivotTable({
     rpivotTable(
@@ -519,8 +510,8 @@ shinyServer(function(input, output, session) {
       vals= 'F_IN',
       rendererName = deflt_view
     )
-    
   })
+  
   output$comcpivottable <- renderRpivotTable({
     rpivotTable(
       variables$com_costs,
@@ -531,8 +522,8 @@ shinyServer(function(input, output, session) {
       vals= 'F_IN',
       rendererName = deflt_view
     )
-    
   })
+  
   output$varpivottable <- renderRpivotTable({
     rpivotTable(
       variables$varactdf,
@@ -542,8 +533,7 @@ shinyServer(function(input, output, session) {
       inclusions = list(Case = list(variables$myinclusion)),
       vals= 'VAR_ACT',
       rendererName = deflt_view
-    )
-    
+    )S
   })
   
   output$comemispivottable <- renderRpivotTable({
@@ -568,8 +558,8 @@ shinyServer(function(input, output, session) {
       vals= 'GHG_kt',
       rendererName = 'Stacked Bar Chart'
     )
-    
   })
+  
   output$EBpivottable <- renderRpivotTable({
     rpivotTable(
       variables$EB,
@@ -579,8 +569,7 @@ shinyServer(function(input, output, session) {
       inclusions = list(Year = list('2006'),Case = list(variables$myinclusion)),
       vals= 'flow_PJ',
       rendererName = 'Table'
-    )
-    
-  })
-  
+      )
+      })
 })
+
