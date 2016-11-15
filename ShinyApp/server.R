@@ -1,3 +1,4 @@
+
 library(shiny)
 library(rpivotTable)
 
@@ -67,6 +68,7 @@ shinyServer(function(input, output,session) {
       groupfiles(input$group)#group the selected files and save to 'grouped_scenarios' rds file
       incProgress(1,detail = paste('done'))
       Sys.sleep(0.1)
+      updateNavbarPage(session, 'mainMenu', 'Power')
     })
     
     #define empty dataframes
@@ -91,7 +93,6 @@ shinyServer(function(input, output,session) {
       print(i)
       incProgress(1/n,detail = paste(paste('Loading scenario ',i,sep = ''),'into viewer'))
       pwr_cap = rbind(pwr_cap,as.data.frame(tmplist[[i]][2]))
-      print(unique(pwr_cap$Case))
       pwr_ncap = rbind(pwr_ncap,as.data.frame(tmplist[[i]][3]))
       pwr_flows = rbind(pwr_flows,as.data.frame(tmplist[[i]][4]))
       pwr_costs = rbind(pwr_costs,as.data.frame(tmplist[[i]][5]))
@@ -595,4 +596,5 @@ shinyServer(function(input, output,session) {
     
   })
   
+>>>>>>> 3c90274dc632eb04d8283f5c81279dd38e1dc39d
 })
