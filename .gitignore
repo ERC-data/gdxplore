@@ -2,3 +2,5 @@
 .Rproj.user
 */.R_Cache
 *.RData
+ShinyApp/rsconnect/
+
