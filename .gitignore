@@ -1,3 +1,4 @@
 *.Rhistory
 .Rproj.user
 */.R_Cache
+*.RData
