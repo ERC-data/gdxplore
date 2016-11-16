@@ -533,7 +533,7 @@ shinyServer(function(input, output, session) {
       inclusions = list(Case = list(variables$myinclusion)),
       vals= 'VAR_ACT',
       rendererName = deflt_view
-    )S
+    )
   })
   
   output$comemispivottable <- renderRpivotTable({

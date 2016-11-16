@@ -6,6 +6,7 @@ shinyUI(navbarPage(title = 'SATIMviz', id = 'mainMenu',
     tabPanel('Scenario Selection', 
         sidebarLayout(
             sidebarPanel(
+                selectizeInput('projects', 'Project list', NULL, multiple = FALSE, choices = projects['title',]),
                 selectizeInput('group', 'Scenario list', NULL, multiple = TRUE, choices = rdslist(dataset)),
                 actionButton("GroupandViewButton",'View results')
                 ),

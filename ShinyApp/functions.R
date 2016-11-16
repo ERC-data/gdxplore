@@ -42,4 +42,4 @@ groupfiles <- function (x, dataset = NULL, directory = rdsfileslocation){ # the 
     }
     print('caching RDS file')
     Store(newrds)
-  }
+}
