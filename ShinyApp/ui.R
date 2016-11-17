@@ -6,9 +6,13 @@ shinyUI(navbarPage(title = 'SATIMviz', id = 'mainMenu',
     tabPanel('Scenario Selection', 
         sidebarLayout(
             sidebarPanel(
-                selectizeInput('projects', 'Project list', NULL, multiple = FALSE, choices = projects['title',]),
+                checkboxInput('ckan', label = 'CKAN', value = FALSE),
+                conditionalPanel(
+                    condition = "input.ckan == true",
+                    selectizeInput('projects', 'Project list', NULL, multiple = FALSE, choices = projects)
+                ),
                 selectizeInput('group', 'Scenario list', NULL, multiple = TRUE, choices = rdslist(dataset)),
-                actionButton("GroupandViewButton",'View results')
+                actionButton("results",'View results')
                 ),
             mainPanel(verbatimTextOutput('row')))
             ),

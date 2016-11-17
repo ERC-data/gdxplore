@@ -55,7 +55,7 @@ shinyServer(function(input, output, session) {
   
   #READING REACTIVELY THE DATAFRAMES THE USERS WANTS TO VIEW
   
-    observeEvent(input$GroupandViewButton, {
+    observeEvent(input$results, {
         print('grouping selection...')
         withProgress(message = 'Grouping Your Selection...',value = 0,{
             groupfiles(input$group, dataset) # cache user's input selection
