@@ -7,11 +7,14 @@ shinyUI(navbarPage(title = 'SATIMviz', id = 'mainMenu',
         sidebarLayout(
             sidebarPanel(
                 checkboxInput('ckan', label = 'CKAN', value = FALSE),
+                
+                # create conditional panel to provide the option of selecting any project with model outputs from CKAN if CKAN 
+                # checkbox is selected.
                 conditionalPanel(
                     condition = "input.ckan == true",
-                    selectizeInput('projects', 'Project list', NULL, multiple = FALSE, choices = projects)
+                    selectInput('ckan_projects', 'Project list', NULL, multiple = FALSE, choices = projects)
                 ),
-                selectizeInput('group', 'Scenario list', NULL, multiple = TRUE, choices = rdslist(dataset)),
+                uiOutput('scenarios'),
                 actionButton("results",'View results')
                 ),
             mainPanel(verbatimTextOutput('row')))

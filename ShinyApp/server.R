@@ -10,8 +10,25 @@ myinclusion = ' '#strtrim(tmp,nchar(tmp)-4) # NOTE This will have to be automati
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
+    
+    # Set dataset value based on CKAN checkbox:
+    # if unchecked, dataset is NULL
+    # if checked, dataset id is retrieved from CKAN
+    datasetInput <- reactive({
+        switch(
+            input$ckan,
+            'true' = unlist(projectlist[sapply(projectlist, '[[', 'organization')['title',] == input$ckan_projects])['name'],
+            'false' = NULL
+        )
+    })
+    
+    # Create dropdown menu with scenario selection based on CKAN checkbox and project selection (datasetInput())
+    output$scenarios <- renderUI({
+        selectInput('scenario_group', 'Scenario list', NULL, multiple = TRUE, choices = rdslist(datasetInput()))
+    })    
+    
     output$row <- renderPrint({
-        input$group
+        input$scenario_group
         })
   
   #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
@@ -58,7 +75,7 @@ shinyServer(function(input, output, session) {
     observeEvent(input$results, {
         print('grouping selection...')
         withProgress(message = 'Grouping Your Selection...',value = 0,{
-            groupfiles(input$group, dataset) # cache user's input selection
+            groupfiles(input$scenario_group, datasetInput()) # cache user's input selection
             incProgress(1, detail = paste('done'))
             Sys.sleep(0.1)
             updateNavbarPage(session, 'mainMenu', 'Power')
