@@ -1,6 +1,9 @@
 # Install and load required packages
-mypackages <- c('ckanr','SOAR','shiny','rpivotTable','rprojroot')
-library(mypackages)
+library('ckanr')
+library('SOAR')
+library('shiny')
+library('rpivotTable')
+library('rprojroot')
 
 # Local variables
 path <- getwd()
