@@ -28,7 +28,13 @@ shinyServer(function(input, output, session) {
     })    
     
     output$row <- renderPrint({
-        input$scenario_group
+        if(length(input$scenario_group > 0)){
+            if(is.null(datasetInput())){
+                input$scenario_group
+            } else {
+                pkg <- package_show(datasetInput(), as = 'table')$resources
+                subset(pkg, grepl(paste(input$scenario_group, collapse="|"), pkg$name), select = c('name','description'))
+            }}
         })
   
   #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
