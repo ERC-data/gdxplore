@@ -27,11 +27,21 @@ shinyServer(function(input, output, session) {
         selectInput('scenario_group', 'Scenario list', NULL, multiple = TRUE, choices = rdslist(datasetInput()))
     })    
     
+    # Display selected scenario name and descriptions in main panel
     output$row <- renderPrint({
-        input$scenario_group
+        if(length(input$scenario_group > 0)){
+            if(is.null(datasetInput())){
+                input$scenario_group
+            } else {
+                # Show all the resources belonging to the selected project
+                pkg <- package_show(datasetInput(), as = 'table')$resources
+                # Create selection of those resources whose name has been selected in the input scenario multiple choice
+                selection <- grepl(paste('^', paste(input$scenario_group, collapse="$|^"), '$', sep = ""), pkg$name)
+                subset(pkg, selection, select = c('name','description'))
+            }}
         })
   
-  #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
+    # Define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.
     variables <- reactiveValues(pwrdf = data.frame(),
                                 pwr_cap = data.frame(),
                                 pwr_ncap = data.frame(),
