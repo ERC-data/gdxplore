@@ -27,6 +27,7 @@ shinyServer(function(input, output, session) {
         selectInput('scenario_group', 'Scenario list', NULL, multiple = TRUE, choices = rdslist(datasetInput()))
     })    
     
+    # Display selected scenario name and descriptions in main panel
     output$row <- renderPrint({
         if(length(input$scenario_group > 0)){
             if(is.null(datasetInput())){
@@ -37,7 +38,7 @@ shinyServer(function(input, output, session) {
             }}
         })
   
-  #define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
+  # Define all dataframes for the pivot tables which will change when button is clicked to group another set of results. Has to be done one by one >.<
     variables <- reactiveValues(pwrdf = data.frame(),
                                 pwr_cap = data.frame(),
                                 pwr_ncap = data.frame(),
