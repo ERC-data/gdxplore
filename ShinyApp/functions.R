@@ -4,14 +4,15 @@ rdslist <- function (dataset = NULL, directory = rdsfileslocation) {
     if(is.null(dataset)){
         details <- file.info(list.files(directory, pattern="*.rds")) # get list of all rds files 
         details <- details[with(details, order(as.POSIXct(mtime))), ] # order by last modified
-        rdslist <- rownames(details)[!(grepl('grouped',rownames(details)))] # get all rds files which are do not have 'processed' in the name ie - only scenarios. 
-        rdslist <- gsub('.{4}$', '', rdslist) # remove the .rds extension from file name
-        return(rdslist)
+        r <- rownames(details)[!(grepl('grouped',rownames(details)))] # get all rds files which are do not have 'processed' in the name ie - only scenarios. 
+        r <- toupper(gsub('\\..*', '', r, ignore.case = TRUE)) # remove the .rds extension from file name and make capital
+        return(r)
         
         # CKAN implementation     
     } else {
-        rdslist <- package_show(dataset, as = 'table')$resources$name
-        return(rdslist)
+        r <- package_show(dataset, as = 'table')$resources$name
+        #r <- toupper(gsub('[.]*', '', r, ignore.case = TRUE)) # remove the .rds extension from file name and make capital
+        return(r)
     }
 }
 

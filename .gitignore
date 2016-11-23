@@ -4,3 +4,4 @@
 *.RData
 ShinyApp/rsconnect/
 *.html
+.DS_Store
