@@ -77,7 +77,8 @@ shinyServer(function(input, output, session) {
                                 com_flows = data.frame(),
                                 clpricesdf = data.frame(),
                                 varactdf = data.frame(),
-                                myinclusion = 'temp'
+                                myinclusion = 'temp',
+                                comsMargs = data.frame()
                                 )
   
   #READING REACTIVELY THE DATAFRAMES THE USERS WANTS TO VIEW
@@ -148,11 +149,12 @@ shinyServer(function(input, output, session) {
             all_emis = rbind(all_emis,as.data.frame(tmplist[[i]][33]))
             pwr_indicators = rbind(pwr_indicators,as.data.frame(tmplist[[i]][1])) #note that i have started using up the old indexes which are not used in the new ShinyAPP
             EB = rbind(EB,as.data.frame(tmplist[[i]][34]))
+            comsMargs = rbind(comsMargs,as.data.frame(tmplist[[i]][35]))
             Sys.sleep(0.1)
             }
             })
     
-    #now assign the newly read in dataframes to reactive variables
+    #now assign the newly read in dataframes to be shiny reactive variables
     variables$pwr_cap = pwr_cap
     variables$pwr_ncap = pwr_ncap
     variables$pwr_flows = pwr_flows
@@ -187,6 +189,7 @@ shinyServer(function(input, output, session) {
     variables$all_emis = all_emis
     variables$pwr_indicators = pwr_indicators
     variables$EB = EB
+    variables$comsMargs = comsMargs
     
     casenames = unique(pwr_cap$Case)
     variables$myinclusion = sort(casenames)[1]
@@ -587,6 +590,7 @@ shinyServer(function(input, output, session) {
     )
   })
   
+  #ENERGY BALANCE
   output$EBpivottable <- renderRpivotTable({
     rpivotTable(
       variables$EB,
@@ -598,5 +602,16 @@ shinyServer(function(input, output, session) {
       rendererName = 'Table'
       )
       })
+  output$comsMargspivottable <- renderRpivotTable({
+    rpivotTable(
+      variables$comsMargs,
+      rows=c('Commodity'),
+      col = 'Year',
+      aggregatorName=deflt_aggr,
+      inclusions = list(Year = list('2006'),Case = list(variables$myinclusion)),
+      vals= 'comsMargs_value',
+      rendererName = 'Table'
+    )
+  })
 })
 
