@@ -98,7 +98,7 @@ shinyServer(function(input, output, session) {
             tradf = tra_flows = tra_costs = tra_cap = tra_ncap = refs_costs = refs_flows =
             refs_ncap = refs_cap =pwr_emis = ind_emis = res_emis = com_emis = tra_emis =
             sup_emis= refs_emis= all_emis = resdf = res_flows = res_cost = inddf = 
-            ind_costs = ind_flows =comdf  = com_costs = com_flows = clpricesdf = varactdf = data.frame()
+            ind_costs = ind_flows =comdf  = com_costs = com_flows = clpricesdf = varactdf = comsMargs= data.frame()
         
         tmplist = newrds # retrieve cached object from groupfiles function
         
