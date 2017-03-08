@@ -602,15 +602,16 @@ shinyServer(function(input, output, session) {
       rendererName = 'Table'
       )
       })
+  #COMMODITY MARGINALS TAB
   output$comsMargspivottable <- renderRpivotTable({
     rpivotTable(
       variables$comsMargs,
-      rows=c('Commodity'),
+      rows=c('Commodity','Commodity_Name'),
       col = 'Year',
       aggregatorName=deflt_aggr,
-      inclusions = list(Year = list('2006'),Case = list(variables$myinclusion)),
+      inclusions = list(Case = list(variables$myinclusion)),
       vals= 'comsMargs_value',
-      rendererName = 'Table'
+      rendererName = 'Col Heatmap'
     )
   })
 })
