@@ -67,5 +67,6 @@ shinyUI(navbarPage(title = 'SATIMviz', id = 'mainMenu',
 
     tabPanel('Emissions',rpivotTableOutput('allemispivottable')),
 
-    tabPanel('Energy Balance',rpivotTableOutput('EBpivottable'))
+    tabPanel('Energy Balance',rpivotTableOutput('EBpivottable')),
+    tabPanel('Commodity Marginals',rpivotTableOutput('comsMargspivottable'))
 ))
