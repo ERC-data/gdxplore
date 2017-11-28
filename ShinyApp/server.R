@@ -577,7 +577,7 @@ shinyServer(function(input, output, session) {
       rendererName = 'Stacked Bar Chart'
     )
   })
-  
+  #EMISSIONS
   output$allemispivottable <- renderRpivotTable({
     rpivotTable(
       variables$all_emis,
@@ -585,7 +585,7 @@ shinyServer(function(input, output, session) {
       col = mycollist,
       aggregatorName=deflt_aggr,
       inclusions = list(Case = list(variables$myinclusion)),
-      vals= 'GHG_kt',
+      vals= 'CO2eq_kt',
       rendererName = 'Stacked Bar Chart'
     )
   })
@@ -597,7 +597,7 @@ shinyServer(function(input, output, session) {
       rows=c('Sector'),
       col = 'Commodity_Name',
       aggregatorName=deflt_aggr,
-      inclusions = list(Year = list('2006'),Case = list(variables$myinclusion)),
+      inclusions = list(Year = list('2012'),Case = list(variables$myinclusion)),
       vals= 'flow_PJ',
       rendererName = 'Table'
       )
